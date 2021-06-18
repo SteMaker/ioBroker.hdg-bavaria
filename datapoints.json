@@ -1,0 +1,20 @@
+{
+    "boiler": [
+        {
+            "name": "K10-33",
+            "datapoints": [
+                { "id": "power", "name": "Kesselleistung", "type": "number", "role": "level", "unit": "%", "data-id": "22024"}
+            ]
+        }
+    ],
+    "tank": [
+        {
+            "name": "3Temp",
+            "datapoints": [
+                { "id": "tempTop", "name": "Puffer Temperatur Oben", "type": "number", "role": "value.temperature", "unit": "°C", "data-id": "24000"},
+                { "id": "tempMiddle", "name": "Puffer Temperatur Mitte", "type": "number", "role": "value.temperature", "unit": "°C", "data-id": "24001"},
+                { "id": "tempBottom", "name": "Puffer Temperatur Unten", "type": "number", "role": "value.temperature", "unit": "°C", "data-id": "24002"}
+            ]
+        }
+    ]
+}

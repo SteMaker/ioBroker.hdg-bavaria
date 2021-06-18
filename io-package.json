@@ -1,0 +1,84 @@
+{
+  "common": {
+    "name": "hdg-bavaria",
+    "version": "0.0.1",
+    "news": {
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次出版"
+      }
+    },
+    "title": "HDG Bavaria",
+    "titleLang": {
+      "en": "HDG Bavaria",
+      "de": "HDG Bavaria",
+      "ru": "HDG Bavaria",
+      "pt": "HDG Bavaria",
+      "nl": "HDG Bavaria",
+      "fr": "HDG Bavaria",
+      "it": "HDG Bavaria",
+      "es": "HDG Bavaria",
+      "pl": "HDG Bavaria",
+      "zh-cn": "HDG Bavaria"
+    },
+    "desc": {
+      "en": "Access HDG Control of HDG Bavaria boilers",
+      "de": "Zugriff auf HDG Control von HDG Bavaria Kesseln",
+      "ru": "Доступ к данным из HDG Control котлов HDG Bavaria",
+      "pt": "Acesse os dados do HDG Control das caldeiras HDG Bavaria",
+      "nl": "Toegang tot gegevens van HDG Besturing van HDG Bavaria ketels",
+      "fr": "Accéder aux données de HDG Control des chaudières HDG Bavaria",
+      "it": "Accesso ai dati da HDG Control delle caldaie HDG Bavaria",
+      "es": "Acceda a los datos de HDG Control de las calderas HDG Bavaria",
+      "pl": "Dane dostępowe z HDG Control kotłów HDG Bavaria",
+      "zh-cn": "从 HDG Bavaria 锅炉的 HDG Control 访问数据"
+    },
+    "authors": [
+      "stemaker <app.stemaker@gmail.com>"
+    ],
+    "keywords": [
+      "boiler",
+      "hdg",
+      "hdg-bavaria",
+      "hdg control"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "icon": "hdg-bavaria.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/stemaker/ioBroker.hdg-bavaria/master/admin/hdg-bavaria.png",
+    "readme": "https://github.com/stemaker/ioBroker.hdg-bavaria/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "materialize": true,
+    "dependencies": [
+      {
+        "js-controller": ">=2.0.0"
+      }
+    ],
+    "installedFrom": "/opt/iobroker/workspace/ioBroker.hdg-bavaria"
+  },
+  "native": {
+    "ip": "",
+    "name": "",
+    "boilerType": "K10-33",
+    "tankType": "3Temp",
+    "numTanks": 1,
+    "numHeatCircuits": 1,
+    "pollIntervalMins": 5
+  },
+  "objects": [],
+  "instanceObjects": []
+}
