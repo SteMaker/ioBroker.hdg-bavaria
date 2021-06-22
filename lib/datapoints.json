@@ -1,19 +1,32 @@
 {
-    "boiler": [
+    "kessel": [
         {
             "name": "K10-33",
             "datapoints": [
-                { "id": "power", "name": "Kesselleistung", "type": "number", "role": "level", "unit": "%", "dataid": "22024"}
+                { "id": "phase", "name": "Betriebsphase", "type": "string", "role": "text", "dataid": "22026"},
+                { "id": "temperatur", "name": "Kesseltemperatur", "type": "number", "role": "level", "unit": "°C", "dataid": "22003"},
+                { "id": "rücklauftemperatur", "name": "Rücklauftemperatur", "type": "number", "role": "level", "unit": "°C", "dataid": "22004"},
+                { "id": "abgastemperatur", "name": "Abgastemperatur", "type": "number", "role": "level", "unit": "°C", "dataid": "22001"},
+                { "id": "status", "name": "Kessel Hauptbetriebsart", "type": "string", "role": "text", "dataid": "22020"},
+                { "id": "externeAnforderung", "name": "Externe Direktanforderung", "type": "number", "role": "level", "unit": "°C", "dataid": "22021"},
+                { "id": "saugzuggeblaese", "name": "Saugzuggebläse", "type": "number", "role": "level", "unit": "%", "dataid": "22030"},
+                { "id": "betriebstunden", "name": "Betriebsstunden Kessel", "type": "number", "role": "value", "unit": "Std", "dataid": "22011"},
+                { "id": "leistung", "name": "Kesselleistung", "type": "number", "role": "level", "unit": "%", "dataid": "22024"},
+                { "id": "reinigung", "name": "Zeit bis Reinigung", "type": "number", "role": "value", "unit": "Std", "dataid": "22025"}
             ]
         }
     ],
-    "tank": [
+    "puffer": [
         {
             "name": "3Temp",
             "datapoints": [
-                { "id": "tempTop", "name": "Puffer Temperatur Oben", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24000"},
-                { "id": "tempMiddle", "name": "Puffer Temperatur Mitte", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24001"},
-                { "id": "tempBottom", "name": "Puffer Temperatur Unten", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24002"}
+                { "id": "tempOben", "name": "Puffer Temperatur Oben", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24000"},
+                { "id": "tempMitte", "name": "Puffer Temperatur Mitte", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24001"},
+                { "id": "tempUnten", "name": "Puffer Temperatur Unten", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24002"},
+                { "id": "anTemp", "name": "Pufferladung ein", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24004"},
+                { "id": "ausTemp", "name": "Pufferladung aus", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24006"},
+                { "id": "anforderungAbhnehmer", "name": "Angeforderte Temperatur Abnehmer", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24098"},
+                { "id": "anforderungQuelle", "name": "Angeforderte Temperatur Quelle", "type": "number", "role": "value.temperature", "unit": "°C", "dataid": "24099"}
             ]
         }
     ]

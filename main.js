@@ -50,10 +50,10 @@ class HdgBavaria extends utils.Adapter {
         }
         this.log.info("IP address: " + this.config.ip);
         this.log.info("Name der Heizungsanlage: " + this.config.name);
-        this.log.info("Boiler type: " + this.config.boilerType);
-        this.log.info("Tank type: " + this.config.tankType);
-        this.log.info("Num tanks: " + this.config.numTanks);
-        this.log.info("Num heat circuits: " + this.config.numHeatCircuits);
+        this.log.info("Kesseltyp: " + this.config.kesselTyp);
+        this.log.info("Puffertyp: " + this.config.pufferTyp);
+        this.log.info("Anzahl Puffer: " + this.config.anzahlPufer);
+        this.log.info("Anzahl Heizkreise: " + this.config.anzahlHeizkreise);
         this.log.info("Polling interval: " + this.config.pollIntervalMins.toString());
 
         this.axiosInstance = axios.create({
@@ -68,14 +68,14 @@ class HdgBavaria extends utils.Adapter {
             },
             native: {},
         });
-        this.setObject(this.config.name+".boiler", {
+        this.setObject(this.config.name+".kessel", {
             type: "channel",
             common: {
                 name: "Heizkessel",
             },
             native: {},
         });
-        this.setObject(this.config.name+".tank", {
+        this.setObject(this.config.name+".puffer", {
             type: "channel",
             common: {
                 name: "Puffer",
@@ -83,9 +83,9 @@ class HdgBavaria extends utils.Adapter {
             native: {},
         });
 
-        for (var i = 0; i < datapoints.boiler[0].datapoints.length; i++) {
-            var dp = datapoints.boiler[0].datapoints[i];
-            this.setObject(this.config.name+".boiler."+dp.id, {
+        for (var i = 0; i < datapoints.kessel[0].datapoints.length; i++) {
+            var dp = datapoints.kessel[0].datapoints[i];
+            this.setObject(this.config.name+".kessel."+dp.id, {
                 type: "state",
                 common: {
                     name: dp.name,
@@ -98,9 +98,9 @@ class HdgBavaria extends utils.Adapter {
                 native: {},
             });
         }
-        for (var i = 0; i < datapoints.tank[0].datapoints.length; i++) {
-            var dp = datapoints.tank[0].datapoints[i];
-            this.setObject(this.config.name+".tank."+dp.id, {
+        for (var i = 0; i < datapoints.puffer[0].datapoints.length; i++) {
+            var dp = datapoints.puffer[0].datapoints[i];
+            this.setObject(this.config.name+".puffer."+dp.id, {
                 type: "state",
                 common: {
                     name: dp.name,
@@ -119,13 +119,13 @@ class HdgBavaria extends utils.Adapter {
         rule.minute = new schedule.Range(0, 59, this.config.pollIntervalMins);
         let that = this;
         var nodes = ""
-        for(var i = 0; i < datapoints.boiler[0].datapoints.length; i++) {
-            nodes += "-" + datapoints.boiler[0].datapoints[i].dataid + "T"
+        for(var i = 0; i < datapoints.kessel[0].datapoints.length; i++) {
+            nodes += "-" + datapoints.kessel[0].datapoints[i].dataid + "T"
         }
-        for(var j = 0; j < datapoints.tank[0].datapoints.length; j++) {
-            nodes += "-" + datapoints.tank[0].datapoints[j].dataid + "T"
+        for(var j = 0; j < datapoints.puffer[0].datapoints.length; j++) {
+            nodes += "-" + datapoints.puffer[0].datapoints[j].dataid + "T"
         }
-        let numDatapoints = datapoints.boiler[0].datapoints.length + datapoints.tank[0].datapoints.length;
+        let numDatapoints = datapoints.kessel[0].datapoints.length + datapoints.puffer[0].datapoints.length;
         nodes = nodes.substring(1)
         nodes = "nodes="+nodes
         this.job = schedule.scheduleJob(rule, () => {
@@ -136,24 +136,24 @@ class HdgBavaria extends utils.Adapter {
             )
                 .then(function (response) {
                     that.log.info("Response from " + that.config.ip + " with " + response.data.length.toString() + " datapoints")
-                    if(response.data.length != datapoints.boiler[0].datapoints.length+datapoints.tank[0].datapoints.length) {
+                    if(response.data.length != datapoints.kessel[0].datapoints.length+datapoints.puffer[0].datapoints.length) {
                         that.log.warn("Unexpected length of response from "+that.config.ip);
                         return;
                     }
                     // @TODO Länge checken, exceptions fangen, neben number andere typen unterstützen
-                    for (var i = 0; i < datapoints.boiler[0].datapoints.length; i++) {
+                    for (var i = 0; i < datapoints.kessel[0].datapoints.length; i++) {
                         try {
                         var value = parseInt(response.data[i].text);
-                        that.setState(that.config.name+ ".boiler."+datapoints.boiler[0].datapoints[i].id, { val: value, ack: true });
+                        that.setState(that.config.name+ ".kessel."+datapoints.kessel[0].datapoints[i].id, { val: value, ack: true });
                         } catch(e) {
                             that.log.warn("Exception while reading response");
                             return
                         }
                     }
-                    for (var j = 0; j < datapoints.tank[0].datapoints.length; j++) {
+                    for (var j = 0; j < datapoints.puffer[0].datapoints.length; j++) {
                         try {
                         var value = parseInt(response.data[i+j].text)
-                        that.setState(that.config.name + ".tank."+datapoints.tank[0].datapoints[j].id, { val: value, ack: true });
+                        that.setState(that.config.name + ".puffer."+datapoints.puffer[0].datapoints[j].id, { val: value, ack: true });
                         } catch(e) {
                             that.log.warn("Exception while reading response");
                             return
