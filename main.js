@@ -2,22 +2,17 @@
 
 const utils = require("@iobroker/adapter-core");
 const schedule = require("node-schedule");
-const axios = require('axios');
-const fs = require('fs')
-var path = require('path');
+const axios = require("axios");
+const fs = require("fs");
+var path = require("path");
 
 const header = {
-	'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-}
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+};
 var root = path.dirname(require.main.filename);
-var datapoints = JSON.parse(fs.readFileSync(root+'/lib/datapoints.json', 'utf-8'))
+var datapoints = JSON.parse(fs.readFileSync(root+"/lib/datapoints.json", "utf-8"));
 
-function validateIPaddress(ipaddress) {  
-    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
-      return (true)  
-    }  
-    return (false)  
-}
+
 class HdgBavaria extends utils.Adapter {
 
     /**
@@ -33,7 +28,8 @@ class HdgBavaria extends utils.Adapter {
     }
 
     async onReady() {
-        if(validateIPaddress(this.config.ip) == false) {
+        var that = this;
+        if(this.validateIPaddress(this.config.ip) == false) {
             this.log.info("Illegal IP Address: "+this.config.ip);
             return;
         }
@@ -50,10 +46,10 @@ class HdgBavaria extends utils.Adapter {
         }
         this.log.info("IP address: " + this.config.ip);
         this.log.info("Name der Heizungsanlage: " + this.config.name);
-        this.log.info("Boiler type: " + this.config.boilerType);
-        this.log.info("Tank type: " + this.config.tankType);
-        this.log.info("Num tanks: " + this.config.numTanks);
-        this.log.info("Num heat circuits: " + this.config.numHeatCircuits);
+        this.log.info("Kesseltyp: " + this.config.kesselTyp);
+        this.log.info("Puffertyp: " + this.config.pufferTyp);
+        this.log.info("Anzahl Puffer: " + this.config.anzahlPuffer);
+        this.log.info("Anzahl Heizkreise: " + this.config.anzahlHeizkreise);
         this.log.info("Polling interval: " + this.config.pollIntervalMins.toString());
 
         this.axiosInstance = axios.create({
@@ -61,6 +57,7 @@ class HdgBavaria extends utils.Adapter {
             timeout: 5000
         });
 
+        // Create device
         this.setObject(this.config.name, {
             type: "device",
             common: {
@@ -68,101 +65,55 @@ class HdgBavaria extends utils.Adapter {
             },
             native: {},
         });
-        this.setObject(this.config.name+".boiler", {
-            type: "channel",
-            common: {
-                name: "Heizkessel",
-            },
-            native: {},
-        });
-        this.setObject(this.config.name+".tank", {
-            type: "channel",
-            common: {
-                name: "Puffer",
-            },
-            native: {},
-        });
-
-        for (var i = 0; i < datapoints.boiler[0].datapoints.length; i++) {
-            var dp = datapoints.boiler[0].datapoints[i];
-            this.setObject(this.config.name+".boiler."+dp.id, {
-                type: "state",
+        // Create channels
+        this.states = [datapoints.kessel[0], datapoints.puffer[0], datapoints.zufuehrung[0], datapoints.heizkreis[0]];
+        this.states.forEach(function(item, index, array) {
+            that.log.info("Create device " + that.config.name + "." + item.channel);
+            that.setObject(that.config.name + "." + item.channel, {
+                type: "channel",
                 common: {
-                    name: dp.name,
-                    type: dp.type,
-                    role: dp.role,
-                    unit: dp.unit,
-                    read: true,
-                    write: true,
+                    name: item.name,
                 },
                 native: {},
             });
-        }
-        for (var i = 0; i < datapoints.tank[0].datapoints.length; i++) {
-            var dp = datapoints.tank[0].datapoints[i];
-            this.setObject(this.config.name+".tank."+dp.id, {
-                type: "state",
-                common: {
-                    name: dp.name,
-                    type: dp.type,
-                    role: dp.role,
-                    unit: dp.unit,
-                    read: true,
-                    write: true,
-                },
-                native: {},
-            });
-        }
-
-        var rule = new schedule.RecurrenceRule();
-        // @TODO This not clean, e.g. when using 18 minutes -> 0, 18, 36, 54
-        rule.minute = new schedule.Range(0, 59, this.config.pollIntervalMins);
-        let that = this;
-        var nodes = ""
-        for(var i = 0; i < datapoints.boiler[0].datapoints.length; i++) {
-            nodes += "-" + datapoints.boiler[0].datapoints[i].dataid + "T"
-        }
-        for(var j = 0; j < datapoints.tank[0].datapoints.length; j++) {
-            nodes += "-" + datapoints.tank[0].datapoints[j].dataid + "T"
-        }
-        let numDatapoints = datapoints.boiler[0].datapoints.length + datapoints.tank[0].datapoints.length;
-        nodes = nodes.substring(1)
-        nodes = "nodes="+nodes
-        this.job = schedule.scheduleJob(rule, () => {
-            this.log.info("Query " + numDatapoints.toString() + " datapoints from " + this.config.ip)
-            this.axiosInstance.post('/ApiManager.php?action=dataRefresh',
-                nodes,
-                { headers: header }
-            )
-                .then(function (response) {
-                    that.log.info("Response from " + that.config.ip + " with " + response.data.length.toString() + " datapoints")
-                    if(response.data.length != datapoints.boiler[0].datapoints.length+datapoints.tank[0].datapoints.length) {
-                        that.log.warn("Unexpected length of response from "+that.config.ip);
-                        return;
-                    }
-                    // @TODO Länge checken, exceptions fangen, neben number andere typen unterstützen
-                    for (var i = 0; i < datapoints.boiler[0].datapoints.length; i++) {
-                        try {
-                        var value = parseInt(response.data[i].text);
-                        that.setState(that.config.name+ ".boiler."+datapoints.boiler[0].datapoints[i].id, { val: value, ack: true });
-                        } catch(e) {
-                            that.log.warn("Exception while reading response");
-                            return
-                        }
-                    }
-                    for (var j = 0; j < datapoints.tank[0].datapoints.length; j++) {
-                        try {
-                        var value = parseInt(response.data[i+j].text)
-                        that.setState(that.config.name + ".tank."+datapoints.tank[0].datapoints[j].id, { val: value, ack: true });
-                        } catch(e) {
-                            that.log.warn("Exception while reading response");
-                            return
-                        }
-                    }
-                })
-                .catch(function (error) {
-                    that.log.info(error);
+        });
+        // Create states and list of nodes
+        var nodes = "";
+        that.numDatapoints = 0;
+        this.states.forEach(function(item, index, array) {
+            let len = item.states.length;
+            that.numDatapoints += len;
+            for (let i = 0; i < len; i++) {
+                var dp = item.states[i];
+                that.log.info("Create state " + that.config.name + "." + item.channel + "." + dp.id);
+                that.setObject(that.config.name + "." + item.channel + "." + dp.id, {
+                    type: "state",
+                    common: {
+                        name: dp.name,
+                        type: dp.iobType,
+                        role: dp.iobRole,
+                        unit: dp.unit,
+                        read: true,
+                        write: true,
+                    },
+                    native: {},
                 });
+                nodes += "-" + dp.dataid + "T";
+            }
+        });
+
+        // Fix nodes string and do a first query
+        nodes = nodes.substring(1);
+        nodes = "nodes="+nodes;
+        this.poll(nodes);
+
+        // Schedule regular polling
+        var rule = new schedule.RecurrenceRule();
+        // @TODO This not clean, e.g. when using 18 minutes -> 0:00, 0:18, 0:36, 0:54, (!) 0:00, 0:18
+        rule.minute = new schedule.Range(0, 59, this.config.pollIntervalMins);
+        this.job = schedule.scheduleJob(rule, () => {
+            this.log.info("Query " + that.numDatapoints.toString() + " datapoints from " + this.config.ip);
+            this.poll(nodes);
         });
     }
 
@@ -172,12 +123,65 @@ class HdgBavaria extends utils.Adapter {
      */
     onUnload(callback) {
         try {
-            this.job.cancel()
+            this.job.cancel();
             callback();
         } catch (e) {
             callback();
         }
     }
+
+    poll(nodes) {
+        var that = this;
+        this.axiosInstance.post("/ApiManager.php?action=dataRefresh",
+            nodes,
+            { headers: header }
+        )
+            .then(function (response) {
+                that.log.info("Response from " + that.config.ip + " with " + response.data.length.toString() + " datapoints");
+                if (response.data.length != that.numDatapoints) {
+                    that.log.warn("Unexpected length of response from " + that.config.ip);
+                    return;
+                }
+
+                let dpCnt = 0;
+                that.states.forEach(function (item, index, array) {
+                    let len = item.states.length;
+                    for (let i = 0; i < len; i++) {
+                        that.log.info("Updating channel " + item.name + " " + item.states[i].id);
+                        var dp = item.states[i];
+                        try {
+                            var value = that.parseDatapoint(dp, response.data[dpCnt].text);
+                            that.setState(that.config.name + "." + item.channel + "." + dp.id, { val: value, ack: true });
+                        } catch (e) {
+                            that.log.warn("Exception while reading response of element " + i.toString());
+                            return;
+                        }
+                        dpCnt++;
+                    }
+                })
+            })
+            .catch(function (error) {
+                that.log.info(error);
+            });
+    }
+
+    validateIPaddress(ipaddress) {
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+            return (true);
+        }
+        return (false);
+    }
+
+    parseDatapoint(cfg, text) {
+        if (cfg.hdgType == "int") {
+            return parseInt(text);
+        } else if (cfg.hdgType == "float") {
+            return parseFloat(text);
+        } else if (cfg.hdgType == "string") {
+            return text;
+        }
+    }
+
 }
 
 if (require.main !== module) {

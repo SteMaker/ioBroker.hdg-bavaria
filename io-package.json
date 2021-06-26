@@ -45,6 +45,8 @@
       "stemaker <app.stemaker@gmail.com>"
     ],
     "keywords": [
+      "heizung",
+      "kessel",
       "boiler",
       "hdg",
       "hdg-bavaria",
@@ -73,10 +75,10 @@
   "native": {
     "ip": "",
     "name": "",
-    "boilerType": "K10-33",
-    "tankType": "3Temp",
-    "numTanks": 1,
-    "numHeatCircuits": 1,
+    "kesselTyp": "K10-33",
+    "pufferTyp": "3Temp",
+    "anzahlPuffer": 1,
+    "anzahlHeizkreise": 1,
     "pollIntervalMins": 5
   },
   "objects": [],
