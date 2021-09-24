@@ -47,7 +47,6 @@
                 { "id": "lagerinhalt", "name": "Aktuelle Lagerinhalt", "iobType": "number", "iobRole": "value", "unit": "kg", "dataid": "21006", "hdgType": "int"},
                 { "id": "verbrauch", "name": "Verbrauch seit letzter Füllung", "iobType": "number", "iobRole": "value", "unit": "kg", "dataid": "21007", "hdgType": "int"},
                 { "id": "fuelldatum", "name": "Letzte Füllung", "iobType": "string", "iobRole": "text", "dataid": "21008", "hdgType": "string"}
-
             ]
         }
     ],
@@ -60,7 +59,8 @@
             "states": [
                 { "id": "tagSoll", "name": "Tagbetrieb Raumtemperatur Soll", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "6022", "hdgType": "int"},
                 { "id": "nachtSoll", "name": "Nachtbetrieb Raumtemperatur Soll", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "6023", "hdgType": "int"},
-                { "id": "anforderungQuelle", "name": "Angeforderte Temperatur bei Quelle", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "26099", "hdgType": "int"}
+                { "id": "anforderungQuelle", "name": "Angeforderte Temperatur bei Quelle", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "26099", "hdgType": "int"},
+                { "id": "vorlauftemperatur", "name": "Vorlauftemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "26000", "hdgType": "int"}
             ]
         }
     ]
