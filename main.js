@@ -11,6 +11,7 @@ const header = {
 };
 var root = path.dirname(require.main.filename);
 var datapoints = JSON.parse(fs.readFileSync(root+"/lib/datapoints.json", "utf-8"));
+var statsChannels = JSON.parse(fs.readFileSync(root+"/lib/stats_channels.json", "utf-8"));
 
 
 class HdgBavaria extends utils.Adapter {
@@ -102,6 +103,8 @@ class HdgBavaria extends utils.Adapter {
             }
         });
 
+        that.createStats();
+
         // Fix nodes string and do a first query
         nodes = nodes.substring(1);
         nodes = "nodes="+nodes;
@@ -110,6 +113,7 @@ class HdgBavaria extends utils.Adapter {
         // Schedule regular polling
         var rule = new schedule.RecurrenceRule();
         // @TODO This not clean, e.g. when using 18 minutes -> 0:00, 0:18, 0:36, 0:54, (!) 0:00, 0:18
+        // BUT!! We rely on stats that the timer will fire at minute zero of every hour (xx:00)
         rule.minute = new schedule.Range(0, 59, this.config.pollIntervalMins);
         this.job = schedule.scheduleJob(rule, () => {
             this.log.info("Query " + that.numDatapoints.toString() + " datapoints from " + this.config.ip);
@@ -127,6 +131,34 @@ class HdgBavaria extends utils.Adapter {
             callback();
         } catch (e) {
             callback();
+        }
+    }
+
+    createStats() {
+        // Create statistics channel
+        this.setObject(this.config.name + ".statistics", {
+            type: "channel",
+            common: {
+                name: "statistics",
+            },
+            native: {},
+        });
+
+        let len = statsChannels.statsChannels.length;
+        for (let i = 0; i < len; i++) {
+            var statsChannel = statsChannels.statsChannels[i];
+            this.setObject(this.config.name + ".statistics." + statsChannel.id, {
+                type: "state",
+                common: {
+                    name: statsChannel.name,
+                    type: "number",
+                    role: "value",
+                    unit: "s",
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
         }
     }
 
@@ -152,13 +184,14 @@ class HdgBavaria extends utils.Adapter {
                         try {
                             var value = that.parseDatapoint(dp, response.data[dpCnt].text);
                             that.setState(that.config.name + "." + item.channel + "." + dp.id, { val: value, ack: true });
+                            that.statsUpdate(item.channel, dp.id, value);
                         } catch (e) {
                             that.log.warn("Exception while reading response of element " + i.toString());
                             return;
                         }
                         dpCnt++;
                     }
-                })
+                });
             })
             .catch(function (error) {
                 that.log.info(error);
@@ -182,6 +215,34 @@ class HdgBavaria extends utils.Adapter {
         }
     }
 
+    statsUpdate(channel, stateId, value) {
+        this.log.info("Searching for "+channel+", "+stateId);
+        let len = statsChannels.statsChannels.length;
+        for (let i = 0; i < len; i++) {
+            var statsChannel = statsChannels.statsChannels[i];
+            if (statsChannel.channel == channel && statsChannel.stateId == stateId) {
+                this.statsStateUpdate(statsChannel, value);
+            }
+        }
+    }
+
+    statsStateUpdate(channel, value) {
+        if (channel.statsType == "binaryTimeAccumulateDay") {
+            var date = new Date();
+            if(date.getHours() == 0 && date.getMinutes() == 0) {
+                this.log.info("Resetting stats for "+channel.name);
+                channel.value = 0;
+                this.setState(this.config.name + ".statistics." + channel.id, { val: channel.value, ack: true });
+            }
+            if (value != 0) {
+                this.log.info("Increasing active time of "+channel.name);
+                channel.value = channel.value + this.config.pollIntervalMins*60;
+                this.setState(this.config.name + ".statistics." + channel.id, { val: channel.value, ack: true });
+            } else {
+                this.log.info("Not increasing active time of "+channel.name);
+            }
+        }
+    }
 }
 
 if (require.main !== module) {

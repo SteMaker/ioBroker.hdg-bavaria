@@ -13,16 +13,16 @@
 
 ## hdg-bavaria adapter for ioBroker
 
-Access data from HDG Control of HDG Bavaria boilers
+Access data from HDG Control of HDG Bavaria boilers.
 
 ## Changelog
-<!--
-    Placeholder for the next version (at the beginning of the line):
-    ### **WORK IN PROGRESS**
--->
-
-### **WORK IN PROGRESS**
-* (stemaker) initial release
+<ul>
+  <li>v0.2.1
+    <ul>
+      <li>First released version</li>
+    </ul>
+  </li>
+</ul>
 
 ## License
 MIT License
