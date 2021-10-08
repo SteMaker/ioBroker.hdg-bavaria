@@ -1,5 +1,5 @@
 {
     "statsChannels": [
-        { "id": "laufzeitTag", "name": "Laufzeit heute", "channel": "kessel", "stateId":"leistung", "statsType": "binaryTimeAccumulateDay", "value": 0 },
+        { "id": "laufzeitTag", "name": "Laufzeit heute", "channel": "kessel", "stateId":"leistung", "statsType": "binaryTimeAccumulateDay", "value": 0 }
     ]
 }
