@@ -5,13 +5,14 @@ const schedule = require("node-schedule");
 const axios = require("axios");
 const fs = require("fs");
 var path = require("path");
+const { DH_UNABLE_TO_CHECK_GENERATOR } = require("constants");
 
 const header = {
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
 };
 var root = path.dirname(require.main.filename);
 var datapoints = JSON.parse(fs.readFileSync(root+"/lib/datapoints.json", "utf-8"));
-var statsChannels = JSON.parse(fs.readFileSync(root+"/lib/stats_channels.json", "utf-8"));
+var statisticsStates = JSON.parse(fs.readFileSync(root+"/lib/statistics_states.json", "utf-8"));
 
 
 class HdgBavaria extends utils.Adapter {
@@ -26,17 +27,70 @@ class HdgBavaria extends utils.Adapter {
         });
         this.on("ready", this.onReady.bind(this));
         this.on("unload", this.onUnload.bind(this));
+        this.nodes = "";
+        this.numDatapoints = 0;
     }
 
     async onReady() {
         var that = this;
+
+        if(!that.sanityCheck())
+            return;
+
+        that.axiosInstance = axios.create({
+            baseURL: "http://"+that.config.ip,
+            timeout: 5000
+        });
+
+        // Create device
+        that.setObject(that.config.name, {
+            type: "device",
+            common: {
+                name: that.config.name
+            },
+            native: {},
+        });
+
+        that.createLogChannels();
+        that.createStatisticsStates();
+
+        // Fix nodes string and do a first query
+        that.nodes = that.nodes.substring(1);
+        that.nodes = "nodes="+that.nodes;
+        that.poll();
+
+        // Schedule regular polling
+        var rule = new schedule.RecurrenceRule();
+        // @TODO This not clean, e.g. when using 18 minutes -> 0:00, 0:18, 0:36, 0:54, (!) 0:00, 0:18
+        // BUT!! We rely on stats that the timer will fire at minute zero of every hour (xx:00)
+        rule.minute = new schedule.Range(0, 59, that.config.pollIntervalMins);
+        that.job = schedule.scheduleJob(rule, () => {
+            that.log.info("Query " + that.numDatapoints.toString() + " datapoints from " + that.config.ip);
+            that.poll();
+        });
+    }
+
+    /**
+     * Is called when adapter shuts down - callback has to be called under any circumstances!
+     * @param {() => void} callback
+     */
+    onUnload(callback) {
+        try {
+            this.job.cancel();
+            callback();
+        } catch (e) {
+            callback();
+        }
+    }
+
+    sanityCheck() {
         if(this.validateIPaddress(this.config.ip) == false) {
             this.log.info("Illegal IP Address: "+this.config.ip);
-            return;
+            return false;
         }
         if(this.config.name == "") {
             this.log.info("Kein Name gesetzt");
-            return;
+            return false;
         }
         if(this.config.pollIntervalMins < 1) {
             this.log.warn("Interval zu klein, setze auf 1 Minute");
@@ -52,23 +106,14 @@ class HdgBavaria extends utils.Adapter {
         this.log.info("Anzahl Puffer: " + this.config.anzahlPuffer);
         this.log.info("Anzahl Heizkreise: " + this.config.anzahlHeizkreise);
         this.log.info("Polling interval: " + this.config.pollIntervalMins.toString());
+        return true;
+    }
 
-        this.axiosInstance = axios.create({
-            baseURL: "http://"+this.config.ip,
-            timeout: 5000
-        });
-
-        // Create device
-        this.setObject(this.config.name, {
-            type: "device",
-            common: {
-                name: this.config.name
-            },
-            native: {},
-        });
+    createLogChannels() {
+        var that = this;
         // Create channels
-        this.states = [datapoints.kessel[0], datapoints.puffer[0], datapoints.zufuehrung[0], datapoints.heizkreis[0]];
-        this.states.forEach(function(item, index, array) {
+        that.states = [datapoints.kessel[0], datapoints.puffer[0], datapoints.zufuehrung[0], datapoints.heizkreis[0]];
+        that.states.forEach(function(item, index, array) {
             that.log.info("Create device " + that.config.name + "." + item.channel);
             that.setObject(that.config.name + "." + item.channel, {
                 type: "channel",
@@ -79,9 +124,7 @@ class HdgBavaria extends utils.Adapter {
             });
         });
         // Create states and list of nodes
-        var nodes = "";
-        that.numDatapoints = 0;
-        this.states.forEach(function(item, index, array) {
+        that.states.forEach(function(item, index, array) {
             let len = item.states.length;
             that.numDatapoints += len;
             for (let i = 0; i < len; i++) {
@@ -99,44 +142,15 @@ class HdgBavaria extends utils.Adapter {
                     },
                     native: {},
                 });
-                nodes += "-" + dp.dataid + "T";
+                that.nodes += "-" + dp.dataid + "T";
             }
         });
-
-        that.createStats();
-
-        // Fix nodes string and do a first query
-        nodes = nodes.substring(1);
-        nodes = "nodes="+nodes;
-        this.poll(nodes);
-
-        // Schedule regular polling
-        var rule = new schedule.RecurrenceRule();
-        // @TODO This not clean, e.g. when using 18 minutes -> 0:00, 0:18, 0:36, 0:54, (!) 0:00, 0:18
-        // BUT!! We rely on stats that the timer will fire at minute zero of every hour (xx:00)
-        rule.minute = new schedule.Range(0, 59, this.config.pollIntervalMins);
-        this.job = schedule.scheduleJob(rule, () => {
-            this.log.info("Query " + that.numDatapoints.toString() + " datapoints from " + this.config.ip);
-            this.poll(nodes);
-        });
     }
 
-    /**
-     * Is called when adapter shuts down - callback has to be called under any circumstances!
-     * @param {() => void} callback
-     */
-    onUnload(callback) {
-        try {
-            this.job.cancel();
-            callback();
-        } catch (e) {
-            callback();
-        }
-    }
-
-    createStats() {
+    createStatisticsStates() {
+        var that = this;
         // Create statistics channel
-        this.setObject(this.config.name + ".statistics", {
+        that.setObject(that.config.name + ".statistics", {
             type: "channel",
             common: {
                 name: "statistics",
@@ -144,28 +158,47 @@ class HdgBavaria extends utils.Adapter {
             native: {},
         });
 
-        let len = statsChannels.statsChannels.length;
+        let len = statisticsStates.statisticsStates.length;
         for (let i = 0; i < len; i++) {
-            var statsChannel = statsChannels.statsChannels[i];
-            this.setObject(this.config.name + ".statistics." + statsChannel.id, {
-                type: "state",
-                common: {
-                    name: statsChannel.name,
-                    type: "number",
-                    role: "value",
-                    unit: "s",
-                    read: true,
-                    write: false,
-                },
-                native: {},
-            });
+            var statsState = statisticsStates.statisticsStates[i];
+            switch (statsState.statsType) {
+            case "binaryTimeAccumulateDay":
+                that.createBinaryTimeAccumulateDayState(statsState);
+                break;
+            case "delta7Days":
+                that.createDelta7DaysState(statsState);
+                break;
+            }
         }
     }
 
-    poll(nodes) {
+    createBinaryTimeAccumulateDayState(statsState) {
         var that = this;
-        this.axiosInstance.post("/ApiManager.php?action=dataRefresh",
-            nodes,
+        that.createState(that.config.name, "statistics", statsState.id, {
+            name: statsState.name,
+            type: "number",
+            role: "value",
+            unit: "s",
+            read: true,
+            write: false,
+        });
+    }
+
+    createDelta7DaysState(statsState) {
+        var that = this;
+        that.createState(that.config.name, "statistics", statsState.id+"PerDay", {
+            name: statsState.name,
+            type: "array",
+            role: "list",
+            read: true,
+            write: true
+        });
+    }
+
+    poll() {
+        var that = this;
+        that.axiosInstance.post("/ApiManager.php?action=dataRefresh",
+            that.nodes,
             { headers: header }
         )
             .then(function (response) {
@@ -217,29 +250,47 @@ class HdgBavaria extends utils.Adapter {
 
     statsUpdate(channel, stateId, value) {
         this.log.info("Searching for "+channel+", "+stateId);
-        let len = statsChannels.statsChannels.length;
+        let len = statisticsStates.statisticsStates.length;
         for (let i = 0; i < len; i++) {
-            var statsChannel = statsChannels.statsChannels[i];
+            var statsChannel = statisticsStates.statisticsStates[i];
             if (statsChannel.channel == channel && statsChannel.stateId == stateId) {
                 this.statsStateUpdate(statsChannel, value);
             }
         }
     }
 
-    statsStateUpdate(channel, value) {
-        if (channel.statsType == "binaryTimeAccumulateDay") {
-            var date = new Date();
+    statsStateUpdate(statsState, value) {
+        var that = this;
+        var date = new Date();
+        if (statsState.statsType == "binaryTimeAccumulateDay") {
             if(date.getHours() == 0 && date.getMinutes() == 0) {
-                this.log.info("Resetting stats for "+channel.name);
-                channel.value = 0;
-                this.setState(this.config.name + ".statistics." + channel.id, { val: channel.value, ack: true });
+                that.log.info("Resetting stats for "+statsState.name);
+                statsState.value = 0;
+                that.setState(that.config.name + ".statistics." + statsState.id, { val: statsState.value, ack: true });
             }
             if (value != 0) {
-                this.log.info("Increasing active time of "+channel.name);
-                channel.value = channel.value + this.config.pollIntervalMins*60;
-                this.setState(this.config.name + ".statistics." + channel.id, { val: channel.value, ack: true });
+                that.log.info("Increasing active time of "+statsState.name);
+                statsState.value = statsState.value + that.config.pollIntervalMins*60;
+                that.setState(that.config.name + ".statistics." + statsState.id, { val: statsState.value, ack: true });
             } else {
-                this.log.info("Not increasing active time of "+channel.name);
+                that.log.info("Not increasing active time of "+statsState.name);
+            }
+        } else if (statsState.statsType == "delta7Days") {
+            //if(date.getHours() == 0 && date.getMinutes() == 0) {
+            if((date.getMinutes()%3) == 0) {
+                that.getState(that.config.name + ".statistics." + statsState.id+"PerDay", function(err, oldValues) {
+                    if(oldValues == null) {
+                        // Initialize all 7 days with 0, might not be ideal :(
+                        that.setState(that.config.name + ".statistics." + statsState.id+"PerDay", [0,0,0,0,0,0,0]);
+                    } else if(oldValues.val != null && oldValues.val.length && oldValues.length != 7) {
+                        // Initialize all 7 days with 0, might not be ideal :(
+                        that.setState(that.config.name + ".statistics." + statsState.id+"PerDay", [0,0,0,0,0,0,0]);
+                    }
+                    that.getState(that.config.name + ".statistics." + statsState.id + "PerDay", function (err, oldValues) {
+                        that.log.info("per day update of " + statsState.id + ", length = " + oldValues.length);
+                    });
+                });
+                //that.setState(that.config.name + ".statistics." + statsState.id, { val: statsState.value, ack: true });
             }
         }
     }
