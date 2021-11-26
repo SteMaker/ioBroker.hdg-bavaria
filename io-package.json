@@ -1,19 +1,11 @@
 {
   "common": {
     "name": "hdg-bavaria",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "news": {
-      "0.0.1": {
-        "en": "initial release",
-        "de": "Erstveröffentlichung",
-        "ru": "Начальная версия",
-        "pt": "lançamento inicial",
-        "nl": "Eerste uitgave",
-        "fr": "Première version",
-        "it": "Versione iniziale",
-        "es": "Versión inicial",
-        "pl": "Pierwsze wydanie",
-        "zh-cn": "首次出版"
+      "0.3.0": {
+        "en": "Statistics",
+        "de": "Statistik"
       }
     },
     "title": "HDG Bavaria",
@@ -54,6 +46,7 @@
     ],
     "license": "MIT",
     "platform": "Javascript/Node.js",
+    "main": "build/src/main.js",
     "icon": "hdg-bavaria.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/stemaker/ioBroker.hdg-bavaria/master/admin/hdg-bavaria.png",
@@ -69,7 +62,7 @@
       {
         "js-controller": ">=2.0.0"
       }
-    ]
+    ],
   },
   "native": {
     "ip": "",

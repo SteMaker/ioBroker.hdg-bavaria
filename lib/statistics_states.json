@@ -1,6 +1,0 @@
-{
-    "statisticsStates": [
-        { "id": "laufzeitTag", "name": "Laufzeit heute", "channel": "kessel", "stateId":"leistung", "statsType": "binaryTimeAccumulateDay", "value": 0 },
-        { "id": "verbrauch7Tage", "name": "Pelletverbrauch letzten 7 Tage", "channel": "zufuehrung", "stateId":"verbrauch", "statsType": "delta7Days", "value": 0 }
-    ]
-}
