@@ -6,8 +6,6 @@
 // you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
 import * as schedule from "node-schedule";
-import * as fs from "fs";
-import * as path from "path";
 import { HdgComm } from "./hdgcomm"
 import { default as datapointCfg } from "../lib/datapoints.json";
 import Component from "./lib/component";
@@ -71,11 +69,7 @@ class HdgBavaria extends utils.Adapter {
         this.poll();
 
         // Schedule regular polling
-        const rule = new schedule.RecurrenceRule();
-        // @TODO This not clean, e.g. when using 18 minutes -> 0:00, 0:18, 0:36, 0:54, (!) 0:00, 0:18
-        // BUT!! We rely on stats that the timer will fire at minute zero of every hour (xx:00)
-        //rule.minute = new schedule.Range(0, 59, this.config.pollIntervalMins);
-        this.job = schedule.scheduleJob("*/3 * * * *", () => {
+        this.job = schedule.scheduleJob("*/"+this.config.pollIntervalMins+" * * * *", () => {
             this.poll();
         })
     }
@@ -96,7 +90,7 @@ class HdgBavaria extends utils.Adapter {
         try {
             for (let i = 0; i < datapointCfg.kessel.length; i++) {
                 if (datapointCfg.kessel[i].typeName == this.config.kesselTyp) {
-                    this.boiler = new Boiler(datapointCfg.kessel[i]);
+                    this.boiler = new Boiler(this.log, datapointCfg.kessel[i]);
                     break;
                 }
             }
@@ -112,7 +106,7 @@ class HdgBavaria extends utils.Adapter {
         try {
             for (let i = 0; i < datapointCfg.puffer.length; i++) {
                 if (datapointCfg.puffer[i].typeName == this.config.pufferTyp) {
-                    this.tank = new Tank(datapointCfg.puffer[i]);
+                    this.tank = new Tank(this.log, datapointCfg.puffer[i]);
                     break;
                 }
             }
@@ -128,7 +122,7 @@ class HdgBavaria extends utils.Adapter {
         try {
             for (let i = 0; i < datapointCfg.zufuehrung.length; i++) {
                 if (datapointCfg.zufuehrung[i].typeName == "Standard") { // @TODO: Nothing else supported
-                    this.supply = new Supply(datapointCfg.zufuehrung[i]);
+                    this.supply = new Supply(this.log, datapointCfg.zufuehrung[i]);
                     break;
                 }
             }
@@ -144,7 +138,7 @@ class HdgBavaria extends utils.Adapter {
         try {
             for (let i = 0; i < datapointCfg.heizkreis.length; i++) {
                 if (datapointCfg.heizkreis[i].typeName == "Standard") { // @TODO: Nothing else supported
-                    this.circuit= new Circuit(datapointCfg.heizkreis[i]);
+                    this.circuit= new Circuit(this.log, datapointCfg.heizkreis[i]);
                     break;
                 }
             }
@@ -274,7 +268,7 @@ class HdgBavaria extends utils.Adapter {
                     const c = this.components[i]
                     const state = this.components[i].states[j];
                     try {
-                        var value = this.parseDatapoint(state, data[dpCnt].text);
+                        const value = this.parseDatapoint(state, data[dpCnt].text);
                         if (value != undefined) {
                             this.setState(this.config.name + "." + c.channel + "." + state.id, { val: value, ack: true });
                             state.value = value;
@@ -286,19 +280,22 @@ class HdgBavaria extends utils.Adapter {
                     dpCnt++;
                 }
             }
-            this.log.debug("Updating tank energy")
-            if(this.tank !== null)
+            if(this.tank !== null) {
+                this.log.debug("Updating tank energy")
                 this.setState(this.config.name + ".statistics.ThermischeKapazitaet", this.tank.calcEnergy());
+            }
         })
     }
 
-    private parseDatapoint(state: Datapoint, text: string) {
+    private parseDatapoint(state: Datapoint, text: string):string|number {
         if (state.hdgType == "int") {
             return parseInt(text);
         } else if (state.hdgType == "float") {
             return parseFloat(text);
         } else if (state.hdgType == "string") {
             return text;
+        } else {
+            return ""
         }
     }
 }

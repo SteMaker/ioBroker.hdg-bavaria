@@ -3,14 +3,21 @@ import Datapoint from "./datapoint";
 
 export default class Component extends JSONObject{
     @JSONObject.required
-    typeName: string
+        typeName: string
     @JSONObject.required
-    supported: string
+        supported: string
     @JSONObject.required
-    channel: string
+        channel: string
     @JSONObject.required
-    name: string
+        name: string
     @JSONObject.required
     @JSONObject.array(Datapoint)
-    states: Array<Datapoint>
+        states: Array<Datapoint>
+
+    log: ioBroker.Logger
+
+    public constructor(log_: ioBroker.Logger, json?: any) {
+        super(json);
+        this.log = log_
+    }
 }

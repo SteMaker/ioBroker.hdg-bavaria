@@ -1,20 +1,20 @@
-import {JSONObject} from 'ts-json-object'
+import {JSONObject} from "ts-json-object"
 
 export default class Datapoint extends JSONObject {
     @JSONObject.required
-    id: string
+        id: string
     @JSONObject.required
-    name: string
+        name: string
     @JSONObject.required
-    iobType: string
+        iobType: string
     @JSONObject.required
-    iobRole: string
+        iobRole: string
     @JSONObject.required
-    unit: string
+        unit: string
     @JSONObject.required
-    dataid: string
+        dataid: string
     @JSONObject.required
-    hdgType: string
+        hdgType: string
 
     value: string|number
 }
