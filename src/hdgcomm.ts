@@ -9,6 +9,7 @@ export class HdgComm {
     private dataQuery: string;
 
     public constructor(url: string, q: string) {
+        if(url == "" || q == "") return;
         this.axiosInstance = axios.create({
             baseURL: "http://"+url,
             timeout: 15000
@@ -17,7 +18,7 @@ export class HdgComm {
     }
 
     public dataRefresh(cb: (result: any, error: string) => void): void {
-        this.axiosInstance.post("/ApiManager.php?action=dataRefresh",
+        this.axiosInstance?.post("/ApiManager.php?action=dataRefresh",
             this.dataQuery,
             { headers: header }
         )
