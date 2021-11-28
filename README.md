@@ -13,16 +13,23 @@
 
 ## hdg-bavaria adapter for ioBroker
 
-Access data from HDG Control of HDG Bavaria boilers
+Access data from HDG Control of HDG Bavaria boilers. Currently only a single configuration is supported (K10-33, 850l tank with 3 
+temperature sensors, single heating circuit). Others could be added on request.
 
 ## Changelog
-<!--
-    Placeholder for the next version (at the beginning of the line):
-    ### **WORK IN PROGRESS**
--->
-
-### **WORK IN PROGRESS**
-* (stemaker) initial release
+<ul>
+  <li>v0.3.0
+    <ul>
+      <li>Added tracking energy of the tank. Temperature sensor data is used to evaluate the current thermal energy of the tank.
+      Tank content is currently equally distributed to temperature sensors which might not be accurate depending on sensor positions.</li>
+    </ul>
+  </li>
+  <li>v0.2.1
+    <ul>
+      <li>First released version</li>
+    </ul>
+  </li>
+</ul>
 
 ## License
 MIT License

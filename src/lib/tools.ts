@@ -1,11 +1,10 @@
-const axios = require("axios").default;
+import axios from "axios";
 
 /**
  * Tests whether the given variable is a real object and not an Array
- * @param {any} it The variable to test
- * @returns {it is Record<string, any>}
+ * @param it The variable to test
  */
-function isObject(it) {
+export function isObject(it: unknown): it is Record<string, any> {
     // This is necessary because:
     // typeof null === 'object'
     // typeof [] === 'object'
@@ -15,29 +14,28 @@ function isObject(it) {
 
 /**
  * Tests whether the given variable is really an Array
- * @param {any} it The variable to test
- * @returns {it is any[]}
+ * @param it The variable to test
  */
-function isArray(it) {
-    if (typeof Array.isArray === "function") return Array.isArray(it);
+export function isArray(it: unknown): it is any[] {
+    if (Array.isArray != null) return Array.isArray(it);
     return Object.prototype.toString.call(it) === "[object Array]";
 }
 
 /**
- * Translates text to the target language. Automatically chooses the right translation API.
- * @param {string} text The text to translate
- * @param {string} targetLang The target languate
- * @param {string} [yandexApiKey] The yandex API key. You can create one for free at https://translate.yandex.com/developers
- * @returns {Promise<string>}
+ * Translates text using the Google Translate API
+ * @param text The text to translate
+ * @param targetLang The target languate
+ * @param yandexApiKey The yandex API key. You can create one for free at https://translate.yandex.com/developers
  */
-async function translateText(text, targetLang, yandexApiKey) {
+export async function translateText(text: string, targetLang: string, yandexApiKey?: string): Promise<string> {
     if (targetLang === "en") {
         return text;
     } else if (!text) {
         return "";
     }
     if (yandexApiKey) {
-        return translateYandex(text, targetLang, yandexApiKey);
+        throw new Error(`Could not translate to "${targetLang}"`);
+        //return translateYandex(text, targetLang, yandexApiKey);
     } else {
         return translateGoogle(text, targetLang);
     }
@@ -45,34 +43,32 @@ async function translateText(text, targetLang, yandexApiKey) {
 
 /**
  * Translates text with Yandex API
- * @param {string} text The text to translate
- * @param {string} targetLang The target languate
- * @param {string} apiKey The yandex API key. You can create one for free at https://translate.yandex.com/developers
- * @returns {Promise<string>}
- */
-async function translateYandex(text, targetLang, apiKey) {
+ * @param text The text to translate
+ * @param targetLang The target languate
+ * @param apiKey The yandex API key. You can create one for free at https://translate.yandex.com/developers
+async function translateYandex(text: string, targetLang: string, apiKey: string): Promise<string> {
     if (targetLang === "zh-cn") {
         targetLang = "zh";
     }
     try {
         const url = `https://translate.yandex.net/api/v1.5/tr.json/translate?key=${apiKey}&text=${encodeURIComponent(text)}&lang=en-${targetLang}`;
         const response = await axios({url, timeout: 15000});
-        if (response.data && response.data.text && isArray(response.data.text)) {
+        if (isArray(response.data?.text)) {
             return response.data.text[0];
         }
         throw new Error("Invalid response for translate request");
-    } catch (e) {
+    } catch (e: any) {
         throw new Error(`Could not translate to "${targetLang}": ${e}`);
     }
 }
+ */
 
 /**
  * Translates text with Google API
- * @param {string} text The text to translate
- * @param {string} targetLang The target languate
- * @returns {Promise<string>}
+ * @param text The text to translate
+ * @param targetLang The target languate
  */
-async function translateGoogle(text, targetLang) {
+async function translateGoogle(text: string, targetLang: string): Promise<string> {
     try {
         const url = `http://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}&ie=UTF-8&oe=UTF-8`;
         const response = await axios({url, timeout: 15000});
@@ -81,8 +77,8 @@ async function translateGoogle(text, targetLang) {
             return response.data[0][0][0];
         }
         throw new Error("Invalid response for translate request");
-    } catch (e) {
-        if (e.response && e.response.status === 429) {
+    } catch (e: any) {
+        if (e.response?.status === 429) {
             throw new Error(
                 `Could not translate to "${targetLang}": Rate-limited by Google Translate`
             );
@@ -91,9 +87,3 @@ async function translateGoogle(text, targetLang) {
         }
     }
 }
-
-module.exports = {
-    isArray,
-    isObject,
-    translateText
-};
