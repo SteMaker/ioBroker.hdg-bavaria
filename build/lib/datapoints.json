@@ -1,0 +1,69 @@
+{
+    "kessel": [
+        {
+            "typeName": "K10-33",
+            "supported": "K10-33",
+            "channel": "kessel",
+            "name": "Kessel",
+            "states": [
+                { "id": "phase", "name": "Betriebsphase", "iobType": "string", "iobRole": "text", "unit": "", "dataid": "22026", "hdgType": "string" },
+                { "id": "temperatur", "name": "Kesseltemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "22003", "hdgType": "int" },
+                { "id": "rücklauftemperatur", "name": "Rücklauftemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "22004", "hdgType": "int" },
+                { "id": "abgastemperatur", "name": "Abgastemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "22001", "hdgType": "int" },
+                { "id": "status", "name": "Kessel Hauptbetriebsart", "iobType": "string", "iobRole": "text", "unit": "", "dataid": "22020", "hdgType": "string" },
+                { "id": "externeAnforderung", "name": "Externe Direktanforderung", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "22021", "hdgType": "int" },
+                { "id": "saugzuggeblaese", "name": "Saugzuggebläse", "iobType": "number", "iobRole": "level", "unit": "%", "dataid": "22030", "hdgType": "int" },
+                { "id": "betriebstunden", "name": "Betriebsstunden Kessel", "iobType": "number", "iobRole": "value", "unit": "Std", "dataid": "22011", "hdgType": "float" },
+                { "id": "leistung", "name": "Kesselleistung", "iobType": "number", "iobRole": "level", "unit": "%", "dataid": "22024", "hdgType": "int" },
+                { "id": "reinigung", "name": "Zeit bis Reinigung", "iobType": "number", "iobRole": "value", "unit": "Std", "dataid": "22025", "hdgType": "float" }
+            ]
+        }
+    ],
+    "puffer": [
+        {
+            "typeName": "3Temp",
+            "supported": "Puffer mit 3 Sensoren",
+            "channel": "puffer",
+            "name": "Puffer",
+            "size": 850,
+            "states": [
+                { "id": "tempOben", "name": "Puffer Temperatur Oben", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24000", "hdgType": "int" },
+                { "id": "tempMitte", "name": "Puffer Temperatur Mitte", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24001", "hdgType": "int" },
+                { "id": "tempUnten", "name": "Puffer Temperatur Unten", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24002", "hdgType": "int" },
+                { "id": "anTemp", "name": "Pufferladung ein", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24004", "hdgType": "int" },
+                { "id": "ausTemp", "name": "Pufferladung aus", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24006", "hdgType": "int" },
+                { "id": "anforderungAbhnehmer", "name": "Angeforderte Temperatur Abnehmer", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24098", "hdgType": "int" },
+                { "id": "anforderungQuelle", "name": "Angeforderte Temperatur Quelle", "iobType": "number", "iobRole": "value.temperature", "unit": "°C", "dataid": "24099", "hdgType": "int" }
+            ],
+            "tempStates": ["tempOben", "tempMitte", "tempUnten"]
+        }
+    ],
+    "zufuehrung": [
+        {
+            "typeName": "Standard",
+            "supported": "Sacksilo",
+            "channel": "zufuehrung",
+            "name": "Zuführung",
+            "states": [
+                { "id": "betriebswahl", "name": "Betriebswahl", "iobType": "string", "iobRole": "text", "unit": "", "dataid": "1402", "hdgType": "string" },
+                { "id": "lagerinhalt", "name": "Aktuelle Lagerinhalt", "iobType": "number", "iobRole": "value", "unit": "kg", "dataid": "21006", "hdgType": "int" },
+                { "id": "verbrauch", "name": "Verbrauch seit letzter Füllung", "iobType": "number", "iobRole": "value", "unit": "kg", "dataid": "21007", "hdgType": "int" },
+                { "id": "fuelldatum", "name": "Letzte Füllung", "iobType": "string", "iobRole": "text", "unit": "", "dataid": "21008", "hdgType": "string" }
+            ]
+        }
+    ],
+    "heizkreis": [
+        {
+            "typeName": "Standard",
+            "supported": "K10-33",
+            "channel": "heizkreis",
+            "name": "Heizkreis",
+            "states": [
+                { "id": "tagSoll", "name": "Tagbetrieb Raumtemperatur Soll", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "6022", "hdgType": "int" },
+                { "id": "nachtSoll", "name": "Nachtbetrieb Raumtemperatur Soll", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "6023", "hdgType": "int" },
+                { "id": "anforderungQuelle", "name": "Angeforderte Temperatur bei Quelle", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "26099", "hdgType": "int" },
+                { "id": "vorlauftemperatur", "name": "Vorlauftemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "26000", "hdgType": "int" }
+            ]
+        }
+    ]
+}
