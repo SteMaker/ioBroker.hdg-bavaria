@@ -186,6 +186,8 @@ class HdgBavaria extends utils.Adapter {
     private validateIPaddress(ipaddress: string): boolean {
         if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
             return (true);
+        } else if (/^(localhost):([0-9]{1,5})$/.test(ipaddress)) {
+            return (true);
         }
         return (false);
     }
