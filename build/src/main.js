@@ -78,7 +78,7 @@ class HdgBavaria extends utils.Adapter {
         this.nodes = "nodes=" + this.nodes;
         this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes);
         this.log.info(this.nodes);
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 1000));
         this.poll();
         // Schedule regular polling
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
