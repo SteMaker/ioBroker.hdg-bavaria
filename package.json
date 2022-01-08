@@ -1,6 +1,6 @@
 {
   "name": "iobroker.hdg-bavaria",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Access HDG Control of HDG Bavaria boilers",
   "author": {
     "name": "stemaker",
