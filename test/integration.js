@@ -51,7 +51,7 @@ tests.integration(path.join(__dirname, ".."), {
                     });
                     // Start the adapter and wait until it has started
                     await harness.startAdapterAndWait();
-                    await sleep(1000);
+                    await sleep(500);
                     harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function(err, state) {
                         if (err) console.error(err);
                         if (state.val == valueInt) {
