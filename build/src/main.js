@@ -295,7 +295,7 @@ class HdgBavaria extends utils.Adapter {
             }
             if (this.tank !== null) {
                 this.log.debug("Updating tank energy");
-                this.setState(this.config.name + ".statistics.ThermischeKapazitaet", this.tank.calcEnergy());
+                this.setState(this.config.name + ".statistics.ThermischeKapazitaet", { val: this.tank.calcEnergy(), ack: true });
             }
         });
     }
