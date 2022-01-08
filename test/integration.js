@@ -59,7 +59,7 @@ tests.integration(path.join(__dirname, ".."), {
                     console.log("Starting Adapter");
                     await harness.startAdapterAndWait();
                     console.log("Adapter started");
-                    await sleep(500);
+                    await sleep(1000);
                     console.log("Checking state ...");
                     harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function(err, state) {
                         if (err) console.error(err);

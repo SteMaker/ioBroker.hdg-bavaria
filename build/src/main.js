@@ -78,6 +78,7 @@ class HdgBavaria extends utils.Adapter {
         this.nodes = "nodes=" + this.nodes;
         this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes);
         this.log.info(this.nodes);
+        await new Promise(r => setTimeout(r, 500));
         this.poll();
         // Schedule regular polling
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
@@ -282,6 +283,7 @@ class HdgBavaria extends utils.Adapter {
                     try {
                         const value = this.parseDatapoint(state, data[dpCnt].text);
                         if (value != undefined) {
+                            console.log("Setting " + state.id + " to " + value);
                             this.setState(this.config.name + "." + c.channel + "." + state.id, { val: value, ack: true });
                             state.value = value;
                         }
