@@ -38,8 +38,6 @@ tests.integration(path.join(__dirname, ".."), {
                 return new Promise(async (resolve) => {
                     // Create a fresh harness instance each test!
                     const harness = getHarness();
-                    // Start the adapter and wait until it has started
-                    await harness.startAdapterAndWait();
                     console.log("Simulating vorlauftemperatur at "+valueInt);
                     console.log(requestJson);
                     server.on({
@@ -51,6 +49,8 @@ tests.integration(path.join(__dirname, ".."), {
                             body: requestJson
                         }
                     });
+                    // Start the adapter and wait until it has started
+                    await harness.startAdapterAndWait();
                     await sleep(1000);
                     harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function(err, state) {
                         if (err) console.error(err);
