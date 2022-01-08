@@ -27,10 +27,12 @@ tests.integration(path.join(__dirname, ".."), {
             var server = new ServerMock({ host: "127.0.0.1", port: 9003 });
 
             beforeEach(function (done) {
+                console.log("mock server start");
                 server.start(done);
             });
 
             afterEach(function (done) {
+                console.log("mock server stop");
                 server.stop(done);
             });
 
@@ -46,12 +48,18 @@ tests.integration(path.join(__dirname, ".."), {
                         reply: {
                             status: 200,
                             headers: { "content-type": "application/json" },
-                            body: requestJson
+                            body: function(req) {
+                                console.log("mock server reply POST");
+                                return requestJson
+                            }
                         }
                     });
                     // Start the adapter and wait until it has started
+                    console.log("Starting Adapter");
                     await harness.startAdapterAndWait();
+                    console.log("Adapter started");
                     await sleep(500);
+                    console.log("Checking state ...");
                     harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function(err, state) {
                         if (err) console.error(err);
                         if (state.val == valueInt) {
