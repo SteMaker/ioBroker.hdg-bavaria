@@ -18,6 +18,11 @@ temperature sensors, single heating circuit). Others could be added on request.
 
 ## Changelog
 <ul>
+  <li>v0.3.1
+    <ul>
+      <li>Added integration test.</li>
+    </ul>
+  </li>
   <li>v0.3.0
     <ul>
       <li>Added tracking energy of the tank. Temperature sensor data is used to evaluate the current thermal energy of the tank.

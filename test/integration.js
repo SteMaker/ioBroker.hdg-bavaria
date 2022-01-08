@@ -1,4 +1,5 @@
 // adatper config code partly taken from fritzbox adapter
+require('log-timestamp');
 const path = require("path");
 const ServerMock = require("mock-http-server");
 const { tests, utils } = require("@iobroker/testing");
@@ -27,10 +28,12 @@ tests.integration(path.join(__dirname, ".."), {
             var server = new ServerMock({ host: "127.0.0.1", port: 9003 });
 
             beforeEach(function (done) {
+                console.log("mock server start");
                 server.start(done);
             });
 
             afterEach(function (done) {
+                console.log("mock server stop");
                 server.stop(done);
             });
 
@@ -38,8 +41,6 @@ tests.integration(path.join(__dirname, ".."), {
                 return new Promise(async (resolve) => {
                     // Create a fresh harness instance each test!
                     const harness = getHarness();
-                    // Start the adapter and wait until it has started
-                    await harness.startAdapterAndWait();
                     console.log("Simulating vorlauftemperatur at "+valueInt);
                     console.log(requestJson);
                     server.on({
@@ -48,10 +49,18 @@ tests.integration(path.join(__dirname, ".."), {
                         reply: {
                             status: 200,
                             headers: { "content-type": "application/json" },
-                            body: requestJson
+                            body: function(req) {
+                                console.log("mock server reply POST");
+                                return requestJson
+                            }
                         }
                     });
-                    await sleep(1000);
+                    // Start the adapter and wait until it has started
+                    console.log("Starting Adapter");
+                    await harness.startAdapterAndWait();
+                    console.log("Adapter started");
+                    await sleep(2000);
+                    console.log("Checking state ...");
                     harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function(err, state) {
                         if (err) console.error(err);
                         if (state.val == valueInt) {
@@ -62,7 +71,7 @@ tests.integration(path.join(__dirname, ".."), {
                         }
                     });
                 });
-            });
+            }).timeout(10000);
         });
     }
 });
