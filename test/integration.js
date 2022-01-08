@@ -1,4 +1,5 @@
 // adatper config code partly taken from fritzbox adapter
+require('log-timestamp');
 const path = require("path");
 const ServerMock = require("mock-http-server");
 const { tests, utils } = require("@iobroker/testing");
