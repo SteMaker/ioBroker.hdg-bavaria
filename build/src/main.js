@@ -35,6 +35,7 @@ const boiler_1 = __importDefault(require("./lib/boiler"));
 const tank_1 = __importDefault(require("./lib/tank"));
 const supply_1 = __importDefault(require("./lib/supply"));
 const circuit_1 = __importDefault(require("./lib/circuit"));
+const path_1 = require("path");
 class HdgBavaria extends utils.Adapter {
     constructor(options = {}) {
         super({
@@ -73,12 +74,13 @@ class HdgBavaria extends utils.Adapter {
         });
         this.createLogStates();
         this.createStatisticsStates();
+        this.log.info("All states created!");
         // Fix nodes string and do a first query
         this.nodes = this.nodes.substring(1);
         this.nodes = "nodes=" + this.nodes;
         this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes);
         this.log.info(this.nodes);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 2000));
         this.poll();
         // Schedule regular polling
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
@@ -206,12 +208,12 @@ class HdgBavaria extends utils.Adapter {
         }
         return (false);
     }
-    createLogStates() {
+    async createLogStates() {
         for (let i = 0; i < this.components.length; i++) {
             const c = this.components[i];
             const channel = c.channel;
             this.log.info("Create channel " + this.config.name + "." + c.channel);
-            this.setObject(this.config.name + "." + c.channel, {
+            await this.setObjectNotExistsAsync(this.config.name + "." + c.channel, {
                 type: "channel",
                 common: {
                     name: c.name,
@@ -231,33 +233,22 @@ class HdgBavaria extends utils.Adapter {
                     read: true,
                     write: true,
                 };
-                this.createState(this.config.name, c.channel, state.id, stateCommon);
+                await this.createStateAsync(this.config.name, c.channel, state.id, stateCommon);
                 this.nodes += "-" + state.dataid + "T";
             }
         }
+        return new Promise(() => { (0, path_1.resolve)(); });
     }
-    createStatisticsStates() {
+    async createStatisticsStates() {
         // Create statistics channel
-        this.setObject(this.config.name + ".statistics", {
+        await this.setObjectNotExistsAsync(this.config.name + ".statistics", {
             type: "channel",
             common: {
                 name: "statistics",
             },
             native: {},
         });
-        this.createBufferEnergyStates();
-    }
-    createBufferEnergyStates() {
-        //if(this.bufferEnergy.datapoints.length == 0) return;
-        //this.createState(this.config.name, "statistics", "PufferEnergieabgabeHeute", {
-        //    name: "Puffer Energieabgabe heute",
-        //    type: "number",
-        //    role: "value",
-        //    unit: "Wh",
-        //    read: true,
-        //    write: false,
-        //});
-        this.createState(this.config.name, "statistics", "ThermischeKapazitaet", {
+        await this.createStateAsync(this.config.name, "statistics", "ThermischeKapazitaet", {
             name: "Aktuelle thermische Kapazität des Puffers",
             type: "number",
             role: "level",
@@ -265,6 +256,7 @@ class HdgBavaria extends utils.Adapter {
             read: true,
             write: false,
         });
+        return new Promise(() => { (0, path_1.resolve)(); });
     }
     poll() {
         var _a;
@@ -283,7 +275,6 @@ class HdgBavaria extends utils.Adapter {
                     try {
                         const value = this.parseDatapoint(state, data[dpCnt].text);
                         if (value != undefined) {
-                            console.log("Setting " + state.id + " to " + value);
                             this.setState(this.config.name + "." + c.channel + "." + state.id, { val: value, ack: true });
                             state.value = value;
                         }

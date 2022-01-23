@@ -3,6 +3,7 @@ require('log-timestamp');
 const path = require("path");
 const ServerMock = require("mock-http-server");
 const { tests, utils } = require("@iobroker/testing");
+const { expect } = require('chai');
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -59,15 +60,21 @@ tests.integration(path.join(__dirname, ".."), {
                     console.log("Starting Adapter");
                     await harness.startAdapterAndWait();
                     console.log("Adapter started");
-                    await sleep(2000);
+                    await sleep(3000);
                     console.log("Checking state ...");
-                    harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function(err, state) {
+                    harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function (err, state) {
                         if (err) console.error(err);
-                        if (state.val == valueInt) {
-                            console.log("Got the correct value :): "+state.val);
-                            resolve(0);
+                        expect(state).to.exist;
+                        if(!state) {
+                            console.log("Could not retrieve state hdg-bavaria.0.Test.heizkreis.vorlauftemperatur");
                         } else {
-                            console.log("Got an incorrect value :(: "+state.val);
+                            expect(state.val).to.exist
+                            if(!state.val) {
+                            console.log("Could not retrieve value of state hdg-bavaria.0.Test.heizkreis.vorlauftemperatur");
+                            } else {
+                                expect(state.val).to.be.equal(valueInt);
+                                resolve(0);
+                            }
                         }
                     });
                 });

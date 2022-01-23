@@ -14,6 +14,7 @@ import Boiler from "./lib/boiler";
 import Tank from "./lib/tank";
 import Supply from "./lib/supply";
 import Circuit from "./lib/circuit";
+import { resolve } from "path";
 
 class HdgBavaria extends utils.Adapter {
     numDatapoints = 0;
@@ -60,13 +61,14 @@ class HdgBavaria extends utils.Adapter {
 
         this.createLogStates();
         this.createStatisticsStates();
+        this.log.info("All states created!");
 
         // Fix nodes string and do a first query
         this.nodes = this.nodes.substring(1);
         this.nodes = "nodes="+this.nodes;
         this.hdgComm = new HdgComm(this.config.ip, this.nodes)
         this.log.info(this.nodes);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 2000));
         this.poll();
 
         // Schedule regular polling
@@ -193,12 +195,12 @@ class HdgBavaria extends utils.Adapter {
         return (false);
     }
 
-    private createLogStates(): void {
+    private async createLogStates(): Promise<void> {
         for (let i = 0; i < this.components.length; i++) {
             const c = this.components[i];
             const channel = c!.channel;
             this.log.info("Create channel " + this.config.name + "." + c!.channel);
-            this.setObject(this.config.name + "." + c!.channel, {
+            await this.setObjectNotExistsAsync(this.config.name + "." + c!.channel, {
                 type: "channel",
                 common: {
                     name: c!.name,
@@ -219,35 +221,23 @@ class HdgBavaria extends utils.Adapter {
                     read: true,
                     write: true,
                 }
-                this.createState(this.config.name, c!.channel, state.id, stateCommon);
+                await this.createStateAsync(this.config.name, c!.channel, state.id, stateCommon);
                 this.nodes += "-" + state.dataid + "T";
             }
         }
+        return new Promise<void>(() => {resolve()});
     }
 
-    private createStatisticsStates(): void {
+    private async createStatisticsStates(): Promise<void> {
         // Create statistics channel
-        this.setObject(this.config.name + ".statistics", {
+        await this.setObjectNotExistsAsync(this.config.name + ".statistics", {
             type: "channel",
             common: {
                 name: "statistics",
             },
             native: {},
         });
-        this.createBufferEnergyStates();
-    }
-
-    private createBufferEnergyStates(): void {
-        //if(this.bufferEnergy.datapoints.length == 0) return;
-        //this.createState(this.config.name, "statistics", "PufferEnergieabgabeHeute", {
-        //    name: "Puffer Energieabgabe heute",
-        //    type: "number",
-        //    role: "value",
-        //    unit: "Wh",
-        //    read: true,
-        //    write: false,
-        //});
-        this.createState(this.config.name, "statistics", "ThermischeKapazitaet", {
+        await this.createStateAsync(this.config.name, "statistics", "ThermischeKapazitaet", {
             name: "Aktuelle thermische Kapazität des Puffers",
             type: "number",
             role: "level",
@@ -255,6 +245,7 @@ class HdgBavaria extends utils.Adapter {
             read: true,
             write: false,
         });
+        return new Promise<void>(() => {resolve()});
     }
 
     private poll(): void {
@@ -273,7 +264,6 @@ class HdgBavaria extends utils.Adapter {
                     try {
                         const value = this.parseDatapoint(state, data[dpCnt].text);
                         if (value != undefined) {
-                            console.log("Setting "+state.id+" to "+value);
                             this.setState(this.config.name + "." + c.channel + "." + state.id, { val: value, ack: true });
                             state.value = value;
                         }
