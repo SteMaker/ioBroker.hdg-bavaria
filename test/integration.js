@@ -51,7 +51,11 @@ tests.integration(path.join(__dirname, ".."), {
                             status: 200,
                             headers: { "content-type": "application/json" },
                             body: function(req) {
-                                console.log("mock server reply POST");
+                                expect(req).to.be.a("object");
+                                expect(req).to.have.property("body")
+                                expect(req.body).to.have.property("nodes")
+                                expect(req.body.nodes.search("26000T")).to.be.greaterThanOrEqual(0)
+                                console.log("mock server reply POST to request "+JSON.stringify(req.body));
                                 return requestJson
                             }
                         }
@@ -60,7 +64,7 @@ tests.integration(path.join(__dirname, ".."), {
                     console.log("Starting Adapter");
                     await harness.startAdapterAndWait();
                     console.log("Adapter started");
-                    await sleep(3000);
+                    await sleep(5000);
                     console.log("Checking state ...");
                     harness.states.getState("hdg-bavaria.0.Test.heizkreis.vorlauftemperatur", function (err, state) {
                         if (err) console.error(err);

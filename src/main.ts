@@ -59,16 +59,14 @@ class HdgBavaria extends utils.Adapter {
             native: {},
         });
 
-        this.createLogStates();
-        this.createStatisticsStates();
-        this.log.info("All states created!");
+        this.nodes += await this.createLogStates();
+        await this.createStatisticsStates();
+        this.log.info("All states created! Using "+this.nodes+" to query HDG");
 
         // Fix nodes string and do a first query
         this.nodes = this.nodes.substring(1);
         this.nodes = "nodes="+this.nodes;
         this.hdgComm = new HdgComm(this.config.ip, this.nodes)
-        this.log.info(this.nodes);
-        await new Promise(r => setTimeout(r, 2000));
         this.poll();
 
         // Schedule regular polling
@@ -195,7 +193,8 @@ class HdgBavaria extends utils.Adapter {
         return (false);
     }
 
-    private async createLogStates(): Promise<void> {
+    private async createLogStates(): Promise<string> {
+        let nodes = "";
         for (let i = 0; i < this.components.length; i++) {
             const c = this.components[i];
             const channel = c!.channel;
@@ -222,10 +221,11 @@ class HdgBavaria extends utils.Adapter {
                     write: true,
                 }
                 await this.createStateAsync(this.config.name, c!.channel, state.id, stateCommon);
-                this.nodes += "-" + state.dataid + "T";
+                nodes += "-" + state.dataid + "T";
             }
         }
-        return new Promise<void>(() => {resolve()});
+        console.log("createLogStates returning "+nodes)
+        return nodes//new Promise<string>(() => {console.log("resolving");resolve(nodes)});
     }
 
     private async createStatisticsStates(): Promise<void> {
@@ -245,7 +245,7 @@ class HdgBavaria extends utils.Adapter {
             read: true,
             write: false,
         });
-        return new Promise<void>(() => {resolve()});
+        return
     }
 
     private poll(): void {
