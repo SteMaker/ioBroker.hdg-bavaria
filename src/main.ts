@@ -14,7 +14,6 @@ import Boiler from "./lib/boiler";
 import Tank from "./lib/tank";
 import Supply from "./lib/supply";
 import Circuit from "./lib/circuit";
-import { resolve } from "path";
 
 class HdgBavaria extends utils.Adapter {
     numDatapoints = 0;
