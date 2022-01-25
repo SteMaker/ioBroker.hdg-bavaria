@@ -71,14 +71,14 @@ class HdgBavaria extends utils.Adapter {
             },
             native: {},
         });
-        this.createLogStates();
-        this.createStatisticsStates();
+        this.nodes += await this.createLogStates();
+        await this.createStatisticsStates();
+        this.log.info("All states created! Using " + this.nodes + " to query HDG");
         // Fix nodes string and do a first query
         this.nodes = this.nodes.substring(1);
         this.nodes = "nodes=" + this.nodes;
         this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes);
-        this.log.info(this.nodes);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 2000));
         this.poll();
         // Schedule regular polling
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
@@ -206,12 +206,14 @@ class HdgBavaria extends utils.Adapter {
         }
         return (false);
     }
-    createLogStates() {
+    //private async createLogStates(): Promise<string> {
+    async createLogStates() {
+        let nodes = "";
         for (let i = 0; i < this.components.length; i++) {
             const c = this.components[i];
             const channel = c.channel;
             this.log.info("Create channel " + this.config.name + "." + c.channel);
-            this.setObject(this.config.name + "." + c.channel, {
+            await this.setObjectNotExistsAsync(this.config.name + "." + c.channel, {
                 type: "channel",
                 common: {
                     name: c.name,
@@ -231,33 +233,23 @@ class HdgBavaria extends utils.Adapter {
                     read: true,
                     write: true,
                 };
-                this.createState(this.config.name, c.channel, state.id, stateCommon);
-                this.nodes += "-" + state.dataid + "T";
+                await this.createStateAsync(this.config.name, c.channel, state.id, stateCommon);
+                nodes += "-" + state.dataid + "T";
             }
         }
+        console.log("createLogStates returning " + nodes);
+        return nodes; //new Promise<string>(() => {console.log("resolving");resolve(nodes)});
     }
-    createStatisticsStates() {
+    async createStatisticsStates() {
         // Create statistics channel
-        this.setObject(this.config.name + ".statistics", {
+        await this.setObjectNotExistsAsync(this.config.name + ".statistics", {
             type: "channel",
             common: {
                 name: "statistics",
             },
             native: {},
         });
-        this.createBufferEnergyStates();
-    }
-    createBufferEnergyStates() {
-        //if(this.bufferEnergy.datapoints.length == 0) return;
-        //this.createState(this.config.name, "statistics", "PufferEnergieabgabeHeute", {
-        //    name: "Puffer Energieabgabe heute",
-        //    type: "number",
-        //    role: "value",
-        //    unit: "Wh",
-        //    read: true,
-        //    write: false,
-        //});
-        this.createState(this.config.name, "statistics", "ThermischeKapazitaet", {
+        await this.createStateAsync(this.config.name, "statistics", "ThermischeKapazitaet", {
             name: "Aktuelle thermische Kapazität des Puffers",
             type: "number",
             role: "level",
@@ -265,6 +257,7 @@ class HdgBavaria extends utils.Adapter {
             read: true,
             write: false,
         });
+        return;
     }
     poll() {
         var _a;
@@ -283,7 +276,6 @@ class HdgBavaria extends utils.Adapter {
                     try {
                         const value = this.parseDatapoint(state, data[dpCnt].text);
                         if (value != undefined) {
-                            console.log("Setting " + state.id + " to " + value);
                             this.setState(this.config.name + "." + c.channel + "." + state.id, { val: value, ack: true });
                             state.value = value;
                         }
