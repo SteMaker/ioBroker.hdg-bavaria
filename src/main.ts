@@ -23,7 +23,7 @@ class HdgBavaria extends utils.Adapter {
     boiler: Boiler| null  = null;
     tank: Tank | null = null;
     supply: Supply | null = null;
-    circuit: Circuit | null = null;
+    circuit: Circuit[] = [];
     components: Component[]
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
@@ -138,7 +138,9 @@ class HdgBavaria extends utils.Adapter {
         try {
             for (let i = 0; i < datapointCfg.heizkreis.length; i++) {
                 if (datapointCfg.heizkreis[i].typeName == "Standard") { // @TODO: Nothing else supported
-                    this.circuit= new Circuit(this.log, datapointCfg.heizkreis[i]);
+                    for(let instance = 0; instance < this.config.heizkreise.length; instance++) {
+                        this.circuit.push(new Circuit(this.log, this.config.heizkreise[instance], instance, datapointCfg.heizkreis[i]));
+                    }
                     break;
                 }
             }
@@ -152,7 +154,9 @@ class HdgBavaria extends utils.Adapter {
             return false;
         }
 
-        this.components = [this.boiler, this.tank, this.supply, this.circuit];
+        this.components = [this.boiler, this.tank, this.supply];
+        for(let i=0; i<this.circuit.length;i++)
+            this.components.push(this.circuit[i]);
 
         return true;
     }
@@ -178,7 +182,7 @@ class HdgBavaria extends utils.Adapter {
         this.log.info("Kesseltyp: " + this.config.kesselTyp);
         this.log.info("Puffertyp: " + this.config.pufferTyp);
         this.log.info("Anzahl Puffer: " + this.config.anzahlPuffer);
-        this.log.info("Anzahl Heizkreise: " + this.config.anzahlHeizkreise);
+        this.log.info("Heizkreise: " + this.config.heizkreise);
         this.log.info("Polling interval: " + this.config.pollIntervalMins.toString());
         return true;
     }

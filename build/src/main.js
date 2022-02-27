@@ -48,7 +48,7 @@ class HdgBavaria extends utils.Adapter {
         this.boiler = null;
         this.tank = null;
         this.supply = null;
-        this.circuit = null;
+        this.circuit = [];
         this.on("ready", this.onReady.bind(this));
         this.on("unload", this.onUnload.bind(this));
     }
@@ -78,7 +78,6 @@ class HdgBavaria extends utils.Adapter {
         this.nodes = this.nodes.substring(1);
         this.nodes = "nodes=" + this.nodes;
         this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes);
-        await new Promise(r => setTimeout(r, 2000));
         this.poll();
         // Schedule regular polling
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
@@ -153,7 +152,9 @@ class HdgBavaria extends utils.Adapter {
         try {
             for (let i = 0; i < datapoints_json_1.default.heizkreis.length; i++) {
                 if (datapoints_json_1.default.heizkreis[i].typeName == "Standard") { // @TODO: Nothing else supported
-                    this.circuit = new circuit_1.default(this.log, datapoints_json_1.default.heizkreis[i]);
+                    for (let instance = 0; instance < this.config.heizkreise.length; instance++) {
+                        this.circuit.push(new circuit_1.default(this.log, this.config.heizkreise[instance], instance, datapoints_json_1.default.heizkreis[i]));
+                    }
                     break;
                 }
             }
@@ -167,7 +168,9 @@ class HdgBavaria extends utils.Adapter {
             this.log.error("Heizkreistyp wurde nicht gefunden");
             return false;
         }
-        this.components = [this.boiler, this.tank, this.supply, this.circuit];
+        this.components = [this.boiler, this.tank, this.supply];
+        for (let i = 0; i < this.circuit.length; i++)
+            this.components.push(this.circuit[i]);
         return true;
     }
     sanityCheck() {
@@ -193,7 +196,7 @@ class HdgBavaria extends utils.Adapter {
         this.log.info("Kesseltyp: " + this.config.kesselTyp);
         this.log.info("Puffertyp: " + this.config.pufferTyp);
         this.log.info("Anzahl Puffer: " + this.config.anzahlPuffer);
-        this.log.info("Anzahl Heizkreise: " + this.config.anzahlHeizkreise);
+        this.log.info("Heizkreise: " + this.config.heizkreise);
         this.log.info("Polling interval: " + this.config.pollIntervalMins.toString());
         return true;
     }
@@ -206,7 +209,6 @@ class HdgBavaria extends utils.Adapter {
         }
         return (false);
     }
-    //private async createLogStates(): Promise<string> {
     async createLogStates() {
         let nodes = "";
         for (let i = 0; i < this.components.length; i++) {

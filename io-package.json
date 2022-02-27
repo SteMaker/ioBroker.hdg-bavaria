@@ -66,11 +66,12 @@
       {
         "js-controller": ">=2.0.0"
       }
-    ]
+    ],
+    "installedFrom": "/opt/iobroker/workspace/ioBroker.hdg-bavaria"
   },
   "native": {
     "ip": "localhost:9003",
-    "name": "Test",
+    "name": "HDG",
     "kesselTyp": "K10-33",
     "pufferTyp": "3Temp",
     "anzahlPuffer": 1,
