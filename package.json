@@ -1,12 +1,12 @@
 {
   "name": "iobroker.hdg-bavaria",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Access HDG Control of HDG Bavaria boilers",
   "author": {
     "name": "stemaker",
     "email": "app.stemaker@gmail.com"
   },
-  "homepage": "https://github.com/stemaker/ioBroker.hdg-bavaria",
+  "homepage": "https://github.com/SteMaker/ioBroker.hdg-bavaria",
   "license": "MIT",
   "keywords": [
     "boiler",
@@ -18,7 +18,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/stemaker/ioBroker.hdg-bavaria"
+    "url": "https://github.com/SteMaker/ioBroker.hdg-bavaria"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.0",

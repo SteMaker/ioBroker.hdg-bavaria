@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "hdg-bavaria",
-    "version": "0.3.2",
+    "version": "0.4.0",
     "news": {
+      "0.4.0": {
+        "en": "Suport for multiple heating circuits",
+        "de": "Unterstützung von mehreren Heizkreisen"
+      },
       "0.3.2": {
         "en": "Integration test added",
         "de": "Integrationstest hinzugefügt"

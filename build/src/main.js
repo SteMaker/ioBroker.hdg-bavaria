@@ -87,6 +87,7 @@ class HdgBavaria extends utils.Adapter {
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
             this.poll();
         });
+        this.log.info("Adapter started");
     }
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
