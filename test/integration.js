@@ -26,7 +26,7 @@ tests.integration(path.join(__dirname, ".."), {
     defineAdditionalTests(getHarness) {
         describe("Check comm with HDG control mock", () => {
             // Run an HTTP server on localhost:9003
-            var server = new ServerMock({ host: "127.0.0.1", port: 9003 });
+            var server = new ServerMock({ host: "127.0.0.1", port: 9004 });
 
             beforeEach(function (done) {
                 console.log("mock server start");
@@ -44,6 +44,12 @@ tests.integration(path.join(__dirname, ".."), {
                     const harness = getHarness();
                     console.log("Simulating vorlauftemperatur at "+valueInt);
                     console.log(requestJson);
+                    const cfg = {
+                        native: {
+                            "ip": "localhost:9004"
+                        }
+                    }
+                    await harness.changeAdapterConfig("hdg-bavaria", cfg)
                     server.on({
                         method: "POST",
                         path: "*",
