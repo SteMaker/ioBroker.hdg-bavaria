@@ -5,7 +5,6 @@ export default class Circuit extends Component{
         for(let i=0; i < json.states.length; i++) {
             const dataid = parseInt(json.states[i].dataid) + instance*100;
             json.states[i].dataid = dataid.toString();
-            log_.info("circuit id = " + json.states[i].dataid);
         }
         json.channel = channel;
         super(log_, json);

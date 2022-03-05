@@ -182,7 +182,7 @@ class HdgBavaria extends utils.Adapter {
         this.log.info("Kesseltyp: " + this.config.kesselTyp);
         this.log.info("Puffertyp: " + this.config.pufferTyp);
         this.log.info("Anzahl Puffer: " + this.config.anzahlPuffer);
-        this.log.info("Heizkreise: " + this.config.heizkreise);
+        this.log.info("Heizkreise: " + this.config.heizkreise.toString());
         this.log.info("Polling interval: " + this.config.pollIntervalMins.toString());
         return true;
     }

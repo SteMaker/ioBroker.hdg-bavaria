@@ -70,12 +70,12 @@
     "installedFrom": "/opt/iobroker/workspace/ioBroker.hdg-bavaria"
   },
   "native": {
-    "ip": "localhost:9003",
+    "ip": "",
     "name": "HDG",
     "kesselTyp": "K10-33",
     "pufferTyp": "3Temp",
     "anzahlPuffer": 1,
-    "anzahlHeizkreise": 1,
+    "heizkreise": ["heizkreis"],
     "pollIntervalMins": 5
   },
   "objects": [],
