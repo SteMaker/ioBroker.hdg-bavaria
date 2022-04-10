@@ -9,7 +9,7 @@ declare global {
             kesselTyp: string;
             pufferTyp: string;
             anzahlPuffer: number;
-            anzahlHeizkreise: number;
+            heizkreise: string[];
             pollIntervalMins: number;
         }
     }

@@ -30,4 +30,7 @@ export class HdgComm {
                 cb("", error);
             });
     }
+    // To set a value: ActionManager.php?action=set_value_changed&i=<x>&v=<y>
+    // where x is the parameter without '-' and y is the value
+    // The dataRefresh command also works with normal setting parameters
 }

@@ -18,8 +18,14 @@
     <script type="text/javascript" src="words.js"></script>
 
     <script type="text/javascript">
+        var onchange
         // This will be called by the admin adapter when the settings page loads
+        function onChangeWrapper(changed) {
+            console.log("on change");
+            onchange(changed);
+        }
         function load(settings, onChange) {
+            onchange = onChange
             // example: select elements with id=key and class=value and insert value
             if (!settings) return;
             $('.value').each(function () {
@@ -28,16 +34,26 @@
                 if ($key.attr('type') === 'checkbox') {
                     // do not call onChange direct, because onChange could expect some arguments
                     $key.prop('checked', settings[id])
-                        .on('change', () => onChange())
+                        .on('change', () => onChangeWrapper())
                         ;
                 } else {
                     // do not call onChange direct, because onChange could expect some arguments
                     $key.val(settings[id])
-                        .on('change', () => onChange())
-                        .on('keyup', () => onChange())
+                        .on('change', () => onChangeWrapper())
+                        .on('keyup', () => onChangeWrapper())
                         ;
                 }
             });
+            let hz = settings["heizkreise"];
+            if(hz == null) {
+                addCircuit("heizkreis");
+            } else {
+                for(let i=0; i < hz.length; i++) {
+                    if(hz[i] == "")
+                        hz[i] = "heizkreis";
+                    addCircuit(hz[i])
+                }
+            }
             onChange(false);
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
             if (M) M.updateTextFields();
@@ -57,6 +73,14 @@
                     obj[$this.attr('id')] = $this.val();
                 }
             });
+            var hz = [];
+            $('.circuit').each(function () {
+                var $this = $(this);
+                var circuitName = $this.val();
+                console.log("Heizkreis "+circuitName);
+                hz.push(circuitName);
+            });
+            obj["heizkreise"] = hz;
             callback(obj);
         }
         function isAlphaNumericKey(evt) {
@@ -67,6 +91,55 @@
                 return true;
             return false;
         }
+
+        function createHeatCircuitDelButton(div) {
+            var delBtn = document.createElement("a");
+            delBtn.setAttribute("class", "waves-effect waves-light btn btn-iobroker");
+            delBtn.setAttribute("style", "background-color:#3399CC;");
+            delBtn.addEventListener("click", () => {
+                delCircuit(div);
+                onChangeWrapper(true);
+            });
+            var i = document.createElement("i");
+            i.textContent = "remove"
+            i.setAttribute("class", "material-icons right");
+            delBtn.appendChild(i)
+            var span = document.createElement("span");
+            span.setAttribute("class", "translate");
+            span.textContent="Remove heating circuit"
+            delBtn.appendChild(span)
+            translateAll()
+            return delBtn
+        }
+
+        var numCircuits = 0;
+        function addCircuit(name) {
+            var div = document.createElement("div");
+            var labelDiv = document.createElement("div");
+            var label = document.createElement("label");
+            label.setAttribute("class", "translate");
+            label.textContent = "Name: ";
+            labelDiv.appendChild(label)
+            var input = document.createElement("input");
+            input.setAttribute("type", "text");
+            input.setAttribute("class", "circuit");
+            input.setAttribute("circuitName", "circuitName"+numCircuits.toString());
+            input.value = name
+            input.addEventListener('change', () => onChangeWrapper());
+            input.setAttribute("onkeypress", "return isAlphaNumericKey(event);");
+            div.appendChild(createHeatCircuitDelButton(div));
+            div.appendChild(labelDiv);
+            div.appendChild(input);
+            var circuits = document.getElementById("circuits");
+            circuits.appendChild(div);
+            numCircuits++;
+            translateAll()
+        }
+        function delCircuit(div) {
+            console.log("delcircuit");
+            var circuits = document.getElementById("circuits");
+            circuits.removeChild(div);
+        }
     </script>
 
 </head>
@@ -74,34 +147,50 @@
 <body>
 
     <div class="m adapter-container">
-        <div class="row">
-            <div class="col s12 m4 l2">
-                <img src="hdg-bavaria.png" class="logo">
+        <div id="header-area" class="row" >
+            <div id="header-logo-title" class="col s6" >
+                <img class="logo" src="hdg-bavaria.png" >
+                <p>
+                    <span class="translate h-title">HDG Control</span><br />
+                </p>
             </div>
         </div>
-        <div>
-            <input type="text" class="value" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" id="ip">
-            <label for="ip" class="translate">IP Adresse der HDG Control</label>
-        </div>
-        <div>
-            <input type="text" class="value" onkeypress='return isAlphaNumericKey(event)' pattern="[A-Za-z0-9]*" id="name"/>
-            <label for="name" class="translate">Name der Anlage</label>
-        </div>
-        <div>
-            <select name="boilerType" id="boilerType">
-                <option value="K10-33">K10-33</option>
-            </select>
-            <label for="boilerType" class="translate">Kesseltyp</label>
-        </div>
-        <div>
-            <select name="tankType" id="tankType">
-                <option value="3Temp">3 Sensoren</option>
-            </select>
-            <label for="tankType" class="translate">Anzahl Temperatursensoren im Puffer</label>
-        </div>
-        <div>
-            <input type="number" class="value" id="pollIntervalMins">
-            <label for="pollIntervalMins" class="translate">Abfrageinterval [Minuten]</label>
+        <div class="row">
+            <h6 class="translate title" style="background-color:#174475; font-size: 0.9rem; border-radius: 4px;">IP address</h6>
+            <div>
+                <input type="text" class="value" minlength="7" maxlength="15" size="15"
+                    pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" id="ip">
+                <label for="ip" class="translate">IP address of HDG control</label>
+            </div>
+            <h6 class="translate title" style="background-color:#174475; font-size: 0.9rem; border-radius: 4px;">Name of heating facility</h6>
+            <div>
+                <input type="text" class="value" onkeypress='return isAlphaNumericKey(event)' id="name" />
+                <label for="name" class="translate">Name of heating facility</label>
+            </div>
+            <h6 class="translate title" style="background-color:#174475; font-size: 0.9rem; border-radius: 4px;">Boiler</h6>
+            <div>
+                <select name="boilerType" id="boilerType">
+                    <option value="K10-33">K10-33</option>
+                </select>
+                <label for="boilerType" class="translate">Kesseltyp</label>
+            </div>
+            <h6 class="translate title" style="background-color:#174475; font-size: 0.9rem; border-radius: 4px;">Buffer</h6>
+            <div>
+                <select name="tankType" id="tankType">
+                    <option value="3Temp">3 Sensoren</option>
+                </select>
+                <label for="tankType" class="translate">Amount of temperature sensors</label>
+            </div>
+            <h6 class="translate title" style="background-color:#174475; font-size: 0.9rem; border-radius: 4px;">Heat circuits</h6>
+            <div>
+                <a class="waves-effect waves-light btn btn-iobroker" onclick="addCircuit(&quot;heizkreis&quot;);onChangeWrapper(true);this.blur();" style="background-color:#3399CC;"><i class="material-icons right">add</i><span class="translate">Add heating circuit</span></a>
+            </div>
+            <div id="circuits"></div>
+            <h6 class="translate title" style="background-color:#174475; font-size: 0.9rem; border-radius: 4px;">Polling interval</h6>
+            <div>
+                <input type="number" class="value" id="pollIntervalMins">
+                <label for="pollIntervalMins" class="translate">Polling interval [minutes]</label>
+            </div>
         </div>
     </div>
 </body>

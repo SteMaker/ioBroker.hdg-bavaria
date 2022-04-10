@@ -1,10 +1,10 @@
 {
   "common": {
     "name": "hdg-bavaria",
-    "version": "0.3.2",
+    "version": "0.4.0",
     "news": {
-      "0.3.2": {
-        "en": "Support for multiple heat circuits",
+      "0.4.0": {
+        "en": "Suport for multiple heating circuits",
         "de": "Unterstützung von mehreren Heizkreisen"
       },
       "0.3.1": {
@@ -70,15 +70,19 @@
       {
         "js-controller": ">=2.0.0"
       }
-    ]
+    ],
+    "installedFrom": "/opt/iobroker/workspace/ioBroker.hdg-bavaria",
+    "adminUI": {"config": "materialize"}
   },
   "native": {
-    "ip": "localhost:9003",
-    "name": "Test",
+    "ip": "",
+    "name": "HDG",
     "kesselTyp": "K10-33",
     "pufferTyp": "3Temp",
     "anzahlPuffer": 1,
-    "anzahlHeizkreise": 1,
+    "heizkreise": [
+      "heizkreis"
+    ],
     "pollIntervalMins": 5
   },
   "objects": [],

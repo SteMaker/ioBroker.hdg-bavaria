@@ -1,7 +1,7 @@
 /*global systemDictionary:true */
 "use strict";
 
-systemDictionary = {
+var _systemDictionary = {
     "hdg-bavaria adapter settings": {
         "en": "Adapter settings for hdg-bavaria",
         "de": "Adaptereinstellungen für hdg-bavaria",
@@ -37,5 +37,24 @@ systemDictionary = {
         "es": "opcion 2",
         "pl": "Opcja 2",
         "zh-cn": "选项2"
-    }
+    },
+    "IP address": {"en":"IP address","de":"IP Adresse"},
+    "IP address of HDG control": {"en":"IP addres of HDG controls","de":"IP Adresse der HDG control"},
+    "Name of heating facility": {"en":"Name of heating facility", "de":"Name der Heizungsanlage"},
+    "Boiler": { "en": "Boiler", "de": "Kessel" },
+    "Buffer": { "en": "Buffer", "de": "Puffer" },
+    "Heat circuits": { "en": "Heat circuits", "de": "Heizkreise" },
+    "Polling interval": { "en": "Polling interval", "de": "Abfrageintervall" },
+    "Polling interval [minutes]": { "en": "Polling interval [minutes]", "de": "Abfrageintervall [Minuten]" },
+    "Amount of temperature sensors": { "en": "Amount of temperature sensors", "de": "Anzahl Temperatursensoren" },
+    "Boiler type": { "en": "Boiler type", "de": "Kesseltyp" },
+    "Add heating circuit": { "en": "Add heating circuit", "de": "Heizkreis hinzufügen" },
+    "Remove heating circuit": { "en": "Remove heating circuit", "de": "Heizkreis entfernen" },
+    "Some dummy": {"en": "Some dummy", "de": "Some dummy"}
 };
+if (typeof module !== "undefined" && module.parent) {
+    module.exports = _systemDictionary;
+} else {
+   systemDictionary = _systemDictionary;
+}
+//    "": { "en": "", "de": "" }
