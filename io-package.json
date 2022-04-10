@@ -8,6 +8,10 @@
         "de": "Unterstützung von mehreren Heizkreisen"
       },
       "0.3.2": {
+        "en": "Support for multiple heat circuits",
+        "de": "Unterstützung von mehreren Heizkreisen"
+      },
+      "0.3.1": {
         "en": "Integration test added",
         "de": "Integrationstest hinzugefügt"
       },

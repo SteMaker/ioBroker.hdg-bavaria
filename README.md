@@ -18,6 +18,11 @@ temperature sensors, single heating circuit). Others could be added on request.
 
 ## Changelog
 <ul>
+  <li>v0.3.2
+    <ul>
+      <li>Support for multiple heat circuits.</li>
+    </ul>
+  </li>
   <li>v0.3.1
     <ul>
       <li>Added integration test.</li>
