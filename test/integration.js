@@ -21,7 +21,7 @@ tests.integration(path.join(__dirname, ".."), {
 
     // If the adapter may call process.exit during startup, define here which exit codes are allowed.
     // By default, termination during startup is not allowed.
-    allowedExitCodes: [],
+    allowedExitCodes: [11],
 
     // Define your own tests inside defineAdditionalTests
     // Since the tests are heavily instrumented, you need to create and use a so called "harness" to control the tests.
