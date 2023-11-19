@@ -39,6 +39,7 @@ const boiler_1 = __importDefault(require("./lib/boiler"));
 const tank_1 = __importDefault(require("./lib/tank"));
 const supply_1 = __importDefault(require("./lib/supply"));
 const circuit_1 = __importDefault(require("./lib/circuit"));
+const domesticwater_1 = __importDefault(require("./lib/domesticwater"));
 class HdgBavaria extends utils.Adapter {
     constructor(options = {}) {
         super({
@@ -53,6 +54,8 @@ class HdgBavaria extends utils.Adapter {
         this.tank = null;
         this.supply = null;
         this.circuit = [];
+        this.domesticwater = null;
+        this.ContolXL = true;
         this.on("ready", this.onReady.bind(this));
         this.on("unload", this.onUnload.bind(this));
     }
@@ -79,9 +82,9 @@ class HdgBavaria extends utils.Adapter {
         await this.createStatisticsStates();
         this.log.info("All states created! Using " + this.nodes + " to query HDG");
         // Fix nodes string and do a first query
-        this.nodes = this.nodes.substring(1);
+        if (this.ContolXL==false) {this.nodes = this.nodes.substring(1);}
         this.nodes = "nodes=" + this.nodes;
-        this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes);
+        this.hdgComm = new hdgcomm_1.HdgComm(this.config.ip, this.nodes, this.ContolXL);
         this.poll();
         // Schedule regular polling
         this.job = schedule.scheduleJob("*/" + this.config.pollIntervalMins + " * * * *", () => {
@@ -118,6 +121,24 @@ class HdgBavaria extends utils.Adapter {
         }
         if (this.boiler == null) {
             this.log.error("Kesseltyp wurde nicht gefunden");
+            return false;
+        }
+        //Warmwasserspeicher
+        try {
+            for (let i = 0; i < datapoints_json_1.default.brauchwasser.length; i++) {
+                if (datapoints_json_1.default.brauchwasser[i].typeName == "Standard") {
+                    this.domesticwater = new domesticwater_1.default(this.log, datapoints_json_1.default.brauchwasser[i]);
+                    break;
+                }
+            }
+        }
+        catch (e) {
+            this.log.error("Fehler beim lesen der BRauchwasserkonfig");
+            this.log.error(e.message);
+            return false;
+        }
+        if (this.domesticwater == null) {
+            this.log.error("Brauchwasserkonfiguration ist leer");
             return false;
         }
         try {
@@ -173,7 +194,7 @@ class HdgBavaria extends utils.Adapter {
             this.log.error("Heizkreistyp wurde nicht gefunden");
             return false;
         }
-        this.components = [this.boiler, this.tank, this.supply];
+        this.components = [this.boiler, this.tank, this.supply, this.domesticwater];
         for (let i = 0; i < this.circuit.length; i++)
             this.components.push(this.circuit[i]);
         return true;
@@ -241,7 +262,7 @@ class HdgBavaria extends utils.Adapter {
                     write: true,
                 };
                 await this.createStateAsync(this.config.name, c.channel, state.id, stateCommon);
-                nodes += "-" + state.dataid + "T";
+                nodes += "-" + state.dataid + "T";               
             }
         }
         console.log("createLogStates returning " + nodes);
