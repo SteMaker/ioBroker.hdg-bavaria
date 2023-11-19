@@ -65,5 +65,18 @@
                 { "id": "vorlauftemperatur", "name": "Vorlauftemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "26000", "hdgType": "int" }
             ]
         }
+    ],
+    "brauchwasser": [
+        {
+            "typeName": "Standard",
+            "supported": "K10-33",
+            "channel": "brauchwasser",
+            "name": "brauchwasser",
+            "states": [
+                { "id": "brauchwassertemperatur", "name": "Brauchwassertemperatur", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "28000", "hdgType": "int" },
+                { "id": "ladenEin", "name": "Brauchwasser laden Ein", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "8021", "hdgType": "int" },
+                { "id": "ladenAus", "name": "Brauchwasser laden Aus", "iobType": "number", "iobRole": "level", "unit": "°C", "dataid": "8022", "hdgType": "int" }
+            ]
+        }
     ]
 }
