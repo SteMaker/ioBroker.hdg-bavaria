@@ -43,6 +43,8 @@ I have only very few time for this project and moved to HA in the meantime. Ther
   </li>
 </ul>
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 MIT License
 
