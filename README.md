@@ -19,6 +19,10 @@ temperature sensors, configurable number of heating circuits). Others could be a
 I have only very few time for this project and moved to HA in the meantime. There is a similar interesting project https://github.com/srt/hdg-exporter.
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
+
 <ul>
   <li>v0.4.0
     <ul>
